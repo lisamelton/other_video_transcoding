@@ -1,0 +1,181 @@
+#!/usr/bin/env ruby
+#
+# ask-ffmpeg-log
+#
+# Copyright (c) 2019 Don Melton
+#
+
+require 'abbrev'
+require 'optparse'
+
+module Transcoding
+
+  class UsageError < RuntimeError
+  end
+
+  class Command
+    def about
+      <<HERE
+ask-ffmpeg-log 0.1.0
+Copyright (c) 2019 Don Melton
+HERE
+    end
+
+    def usage
+      <<HERE
+Report temporal information from ffmpeg-generated `.log` files
+containing encoding statistics.
+
+Usage: #{$PROGRAM_NAME} [OPTION]... [FILE|DIRECTORY]...
+
+Options:
+    --time          sort results by time instead of speed
+    --reverse       reverse direction of sort
+    --tabular       use tab character as field delimiter and suppress labels
+-h, --help          display this help and exit
+    --version       output version information and exit
+HERE
+    end
+
+    def initialize
+      @by_time = false
+      @reverse = false
+      @tabular = false
+      @logs = []
+      @paths = []
+    end
+
+    def run
+      begin
+        OptionParser.new do |opts|
+          define_options opts
+
+          opts.on '-h', '--help' do
+            puts usage
+            exit
+          end
+
+          opts.on '--version' do
+            puts about
+            exit
+          end
+        end.parse!
+      rescue OptionParser::ParseError => e
+        raise UsageError, e
+      end
+
+      fail UsageError, 'missing argument' if ARGV.empty?
+      ARGV.each { |arg| process_input arg }
+      complete
+      exit
+    rescue UsageError => e
+      Kernel.warn "#{$PROGRAM_NAME}: #{e}\nTry `#{$PROGRAM_NAME} --help more` for more information."
+      exit false
+    rescue StandardError => e
+      Kernel.warn "#{$PROGRAM_NAME}: #{e}"
+      exit(-1)
+    rescue SignalException
+      puts
+      exit(-1)
+    end
+
+    def define_options(opts)
+      opts.on('--time')     { @by_time = true }
+      opts.on('--reverse')  { @reverse = true }
+      opts.on('--tabular')  { @tabular = true }
+    end
+
+    def process_input(path)
+      input = File.absolute_path(path)
+
+      if File.directory? input
+        logs = Dir[input + File::SEPARATOR + '*.log']
+        fail "does not contain `.log` files: #{input}" if logs.empty?
+        @logs += logs
+        @paths << input
+      else
+        fail "not a `.log` file: #{input}" unless File.extname(input) == '.log'
+        @logs << File.absolute_path(input)
+        @paths << File.dirname(input)
+      end
+    end
+
+    def complete
+      @logs.uniq!
+      @paths.uniq!
+
+      if @paths.size > 1
+        prefix = File.dirname(@paths.abbrev.keys.min_by { |key| key.size }) + File::SEPARATOR
+      else
+        prefix = ''
+      end
+
+      if @tabular
+        delimiter = "\t"
+        fps_label = ''
+      else
+        delimiter = ' '
+        fps_label = ' fps'
+      end
+
+      report = []
+
+      @logs.each do |log|
+        video = File.basename(log, '.log')
+        video += " (#{File.dirname(log).sub(prefix, '')})" unless prefix.empty?
+
+        begin
+          content = File.read(log)
+        rescue SystemCallError => e
+          raise "reading `.log` file failed: #{e}"
+        end
+
+        unless content.match(/^.*\R/).to_s.chomp =~ /^ffmpeg/
+          fail "not a ffmpeg-generated `.log` file: #{log}"
+        end
+
+        stats = content.match(/^frame=.*[.0-9]+x */m).to_s.lines.last.to_s.rstrip
+
+        if stats =~ /frame=([0-9]+) fps=( *[.0-9]+)/
+          frames = $1
+          fps = $2
+          seconds = frames.to_f / fps.lstrip.to_f
+          time = sprintf("%02d:%02d:%02d", seconds / (60 * 60), (seconds / 60) % 60, seconds % 60)
+          fps.lstrip! if @tabular
+        else
+          fps = '0.0'
+          time = '00:00:00'
+        end
+
+        time += delimiter
+        line = ''
+        line += time if @by_time
+        line += fps + fps_label + delimiter
+        line += time unless @by_time
+        report << line + video
+      end
+
+      if @by_time
+        report.sort!
+      else
+        report.sort! do |a, b|
+          number_a = a.lstrip.match(/^[.0-9]+/).to_s.to_f
+          number_b = b.lstrip.match(/^[.0-9]+/).to_s.to_f
+
+          if number_a < number_b
+            -1
+          elsif number_a > number_b
+            1
+          else
+            a <=> b
+          end
+        end
+      end
+
+      report.reverse! if (!@reverse and !@by_time) or (@reverse and @by_time)
+      puts report
+    end
+  end
+end
+
+Transcoding::Command.new.run
