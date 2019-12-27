@@ -26,7 +26,7 @@ And many features are supported including:
 * Hardware-based video decoding for improved performance
 * Fallback to software video encoding when appropriate hardware is not available
 * Optional automatic and reliable video cropping
-* Adding audio and subtitle tracks by by language or title
+* Adding audio and subtitle tracks by language or title
 * [Dolby Digital Plus](https://en.wikipedia.org/wiki/Dolby_Digital_Plus) (Enhanced AC-3) audio encoding
 * Burning image-based subtitles into video output to ease player compatibility
 
