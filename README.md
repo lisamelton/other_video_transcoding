@@ -36,6 +36,8 @@ Additional documentation for this project is available in the [wiki](https://git
 
 ## Installation
 
+_Avoid installing within [virtual machines](https://en.wikipedia.org/wiki/Virtual_machine) such as the [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) since access to hardware video encoders may not be allowed, severely impacting performance._
+
 These tools work on Windows, Linux and macOS. They're packaged as a Gem and require Ruby. See "[Installing Ruby](https://www.ruby-lang.org/en/documentation/installation/)" if you don't have it on your platform.
 
 Use this command to install the package: 
