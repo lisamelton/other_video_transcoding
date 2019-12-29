@@ -28,7 +28,7 @@ HERE
 Transcode Blu-ray Disc or DVD rip into a smaller, more portable format
 while remaining high enough quality to be mistaken for the original.
 
-Usage: #{$PROGRAM_NAME} [OPTION]... [FILE]...
+Usage: #{File.basename($PROGRAM_NAME)} [OPTION]... [FILE]...
 
 Creates Matroska `.mkv` format file in current working directory.
 

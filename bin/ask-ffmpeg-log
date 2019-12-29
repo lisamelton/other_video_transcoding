@@ -26,7 +26,7 @@ HERE
 Report temporal information from ffmpeg-generated `.log` files
 containing encoding statistics.
 
-Usage: #{$PROGRAM_NAME} [OPTION]... [FILE|DIRECTORY]...
+Usage: #{File.basename($PROGRAM_NAME)} [OPTION]... [FILE|DIRECTORY]...
 
 Options:
     --time          sort results by time instead of speed
