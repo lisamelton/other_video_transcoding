@@ -833,7 +833,8 @@ HERE
       seconds = Time.now.tv_sec
 
       unless @detect
-        output_path = (@name.nil? ? File.basename(path, '.*') : @name) + '.' + @format.to_s
+        output_path = (@name.nil? ? File.basename(path, '.*') : File.basename(@name)) +
+                      '.' + @format.to_s
         fail "output file already exists: #{output_path}" if File.exist? output_path
 
         log_path = output_path + '.log'
