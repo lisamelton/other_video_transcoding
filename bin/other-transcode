@@ -2,7 +2,7 @@
 #
 # other-transcode
 #
-# Copyright (c) 2019 Don Melton
+# Copyright (c) 2019-2020 Don Melton
 #
 
 require 'English'
@@ -19,7 +19,7 @@ module Transcoding
     def about
       <<HERE
 other-transcode 0.1.0
-Copyright (c) 2019 Don Melton
+Copyright (c) 2019-2020 Don Melton
 HERE
     end
 
