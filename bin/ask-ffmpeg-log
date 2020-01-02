@@ -69,7 +69,8 @@ HERE
       complete
       exit
     rescue UsageError => e
-      Kernel.warn "#{$PROGRAM_NAME}: #{e}\nTry `#{$PROGRAM_NAME} --help more` for more information."
+      Kernel.warn "#{$PROGRAM_NAME}: #{e}"
+      Kernel.warn "Try `#{File.basename($PROGRAM_NAME)} --help` for more information."
       exit false
     rescue StandardError => e
       Kernel.warn "#{$PROGRAM_NAME}: #{e}"
