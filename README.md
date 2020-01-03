@@ -60,6 +60,8 @@ Optional crop previewing also requires the `mpv` command line program.
 
 See "[Download FFmpeg](https://ffmpeg.org/download.html)," "[MKVToolNix Downloads](https://mkvtoolnix.download/downloads.html)" and "[mpv Installation](https://mpv.io/installation/)" to find versions for your platform.
 
+Additional documentation for installing these programs on Windows is available in the [wiki](https://github.com/donmelton/other_video_transcoding/wiki/Windows).
+
 On macOS, all of these programs can be easily installed via [Homebrew](http://brew.sh/), an optional package manager:
 
     brew install ffmpeg
