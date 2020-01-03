@@ -60,6 +60,14 @@ Optional crop previewing also requires the `mpv` command line program.
 
 See "[Download FFmpeg](https://ffmpeg.org/download.html)," "[MKVToolNix Downloads](https://mkvtoolnix.download/downloads.html)" and "[mpv Installation](https://mpv.io/installation/)" to find versions for your platform.
 
+On macOS, all of these programs can be easily installed via [Homebrew](http://brew.sh/), an optional package manager:
+
+    brew install ffmpeg
+    brew install mkvtoolnix
+    brew install mpv
+
+The `ffprobe` program is included within the `ffmpeg` package and the `mkvpropedit` program is included within the `mkvtoolnix` package.
+
 ## Usage
 
 Each tool in this package has several command line options. The `other-transcode` tool is the most complex with over 50 of its own. Use `--help` to list the options available for a specific tool, along with brief instructions on their usage:
