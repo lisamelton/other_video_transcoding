@@ -59,8 +59,6 @@ HERE
       <<HERE
     --print-crop    print only detected video crop geometry and exit
     --mp4           output MP4 instead of Matroska `.mkv` format
-    --name STRING   set output filename, excluding format extension
-                      (default: based on input filename) 
     --copy-track-names
                     copy all input audio track names to output
 HERE
@@ -360,6 +358,9 @@ HERE
 
       opts.on '--name ARG' do |arg|
         @name = arg
+        Kernel.warn '**********'
+        Kernel.warn 'Using deprecated option: --name'
+        Kernel.warn '**********'
       end
 
       opts.on '--copy-track-names' do
