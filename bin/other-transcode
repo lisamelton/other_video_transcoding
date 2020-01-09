@@ -183,9 +183,11 @@ Audio options:
     --main-audio TRACK[=WIDTH]
                     select main audio track by number (default: 1)
                       with optional width (default: surround)
-    --add-audio TRACK|LANGUAGE|STRING[=WIDTH]
+    --add-audio TRACK|all|LANGUAGE|STRING[=WIDTH]
                     add single audio track by number
                       including main audio track
+                    or all audio tracks
+                      excluding main audio track
                     or audio tracks by language code
                       excluding main audio track
                       (in ISO 639-2 format, e.g.: `eng`)
@@ -200,15 +202,16 @@ Audio options:
     --eac3          use Enhanced AC-3 format for surround audio
 
 Subtitle options:
-    --add-subtitle TRACK[=forced]|auto|LANGUAGE|STRING
+    --add-subtitle TRACK[=forced]|auto|all|LANGUAGE|STRING
                     add single subtitle track by number
                       optionally setting forced disposition
                     or enable automatic addition of forced subtitle
-                    or add subtitle tracks by language code
+                    or add all subtitle tracks
+                    or subtitle tracks by language code
                       (in ISO 639-2 format, e.g.: `eng`)
                     or subtitle tracks with titles containing string
                       (comparison is case-insensitve)
-                    (all variations exclude any burned track)
+                    (variations exclude any burned track)
     --burn-subtitle TRACK|auto
                     burn subtitle track by number into video
                       or enable automatic burning of forced subtitle
@@ -1617,7 +1620,8 @@ HERE
           media_info['streams'].each do |stream|
             next if stream['codec_type'] != 'audio'
 
-            if  stream.fetch('tags', {}).fetch('language', '') == selection[:language] and
+            if (selection[:language] == 'all' or
+                stream.fetch('tags', {}).fetch('language', '') == selection[:language]) and
                 stream['index'] != main_audio['index']
               audio_tracks += [{
                 :stream => stream,
@@ -1765,7 +1769,8 @@ HERE
           media_info['streams'].each do |stream|
             next if stream['codec_type'] != 'subtitle'
 
-            if stream.fetch('tags', {}).fetch('language', '') == selection[:language]
+            if (selection[:language] == 'all' or
+                stream.fetch('tags', {}).fetch('language', '') == selection[:language])
               subtitles += [stream]
             end
           end
