@@ -183,6 +183,17 @@ Audio options:
     --main-audio TRACK[=WIDTH]
                     select main audio track by number (default: 1)
                       with optional width (default: surround)
+HERE
+    end
+
+    def usage12
+      <<HERE
+                        (use `original` to disable transcoding)
+HERE
+    end
+
+    def usage13
+      <<HERE
     --add-audio TRACK|all|LANGUAGE|STRING[=WIDTH]
                     add single audio track by number
                       including main audio track
@@ -195,6 +206,17 @@ Audio options:
                       excluding main audio track
                       (comparison is case-insensitve)
                     with optional width (default: stereo)
+HERE
+    end
+
+    def usage14
+      <<HERE
+                      (use `original` to disable transcoding)
+HERE
+    end
+
+    def usage15
+      <<HERE
     --surround-bitrate BITRATE
                     set surround audio bitrate (default: 640)
     --stereo-bitrate BITRATE
@@ -296,12 +318,13 @@ HERE
             case arg
             when 'full'
               puts  usage1 + usage2 + usage3 + usage4 + usage5 + usage6 +
-                    usage7 + usage8 + usage9 + usage10 + usage11
+                    usage7 + usage8 + usage9 + usage10 + usage11 + usage12 +
+                    usage13 + usage14 + usage15
             when 'more'
               puts  usage1 + usage2 + usage3 + usage4 + usage6 + usage7 +
-                    usage8 + usage9 + usage11
+                    usage8 + usage9 + usage11 + usage13 + usage15
             else
-              puts  usage1 + usage3 + usage6 + usage8 + usage11
+              puts  usage1 + usage3 + usage6 + usage8 + usage11 + usage13 + usage15
             end
 
             exit
@@ -607,7 +630,7 @@ HERE
       end
 
       opts.on '--main-audio ARG' do |arg|
-        if arg =~ /^([0-9]+)(?:=(surround|stereo))?$/
+        if arg =~ /^([0-9]+)(?:=(stereo|surround|original))?$/
           @audio_selections[0][:track] = $1.to_i
           @audio_selections[0][:width] = $2.to_sym unless $2.nil?
         else
@@ -616,7 +639,7 @@ HERE
       end
 
       opts.on '--add-audio ARG' do |arg|
-        if arg =~ /^([^=]+)(?:=(surround|stereo))?$/
+        if arg =~ /^([^=]+)(?:=(stereo|surround|original))?$/
           scope = $1
           width = $2
 
@@ -1581,7 +1604,14 @@ HERE
       audio_tracks = [{
         :stream => main_audio,
         :width => width,
-        :bitrate => width == :surround ? @surround_bitrate : @stereo_bitrate
+        :bitrate => case width
+        when :stereo
+          @stereo_bitrate
+        when :surround
+          @surround_bitrate
+        when :original
+          nil
+        end
       }]
 
       titles = {}
@@ -1594,7 +1624,14 @@ HERE
         end
 
         width = selection[:width]
-        bitrate = width == :surround ? @surround_bitrate : @stereo_bitrate
+        bitrate = case width
+        when :stereo
+          @stereo_bitrate
+        when :surround
+          @surround_bitrate
+        when :original
+          nil
+        end
 
         unless selection[:track].nil?
           audio_track = 0
@@ -1665,28 +1702,32 @@ HERE
         bitrate = nil
         channels = nil
 
-        if track[:width] == :surround
-          if codec_name == @surround_encoder or codec_name == 'ac3'
+        if track[:width] == :original
             encoder = 'copy'
-          elsif input_channels > 2
-            encoder = @surround_encoder
-            bitrate = @surround_bitrate
+        else
+          if track[:width] == :surround
+            if codec_name == @surround_encoder or codec_name == 'ac3'
+              encoder = 'copy'
+            elsif input_channels > 2
+              encoder = @surround_encoder
+              bitrate = @surround_bitrate
+            end
           end
-        end
 
-        if encoder.nil?
-          if input_channels <= 2 and (codec_name == 'aac' or
-              ((codec_name == @surround_encoder or codec_name == 'ac3') and
-              (track[:stream]['bit_rate'].to_i / 1000) <= @stereo_bitrate))
-            encoder = 'copy'
-          else
-            encoder = @stereo_encoder
-            bitrate = @stereo_bitrate
+          if encoder.nil?
+            if input_channels <= 2 and (codec_name == 'aac' or
+                ((codec_name == @surround_encoder or codec_name == 'ac3') and
+                (track[:stream]['bit_rate'].to_i / 1000) <= @stereo_bitrate))
+              encoder = 'copy'
+            else
+              encoder = @stereo_encoder
+              bitrate = @stereo_bitrate
 
-            if input_channels > 2
-              channels = 2
-            elsif input_channels == 1
-              bitrate = @stereo_bitrate / 2
+              if input_channels > 2
+                channels = 2
+              elsif input_channels == 1
+                bitrate = @stereo_bitrate / 2
+              end
             end
           end
         end
