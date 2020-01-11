@@ -130,6 +130,7 @@ HERE
 
     def usage10
       <<HERE
+    --copy-video    disable transcoding and copy original video track
 
 Apple Video Toolbox encoder options:
     --vt-allow-sw   allow software encoding
@@ -438,10 +439,12 @@ HERE
 
       opts.on '--[no-]10-bit' do |arg|
         @ten_bit = arg
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--preset ARG' do |arg|
         @preset = arg
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--decode ARG' do |arg|
@@ -478,6 +481,8 @@ HERE
         else
           @target = [arg.to_i, 1].max
         end
+
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--crop ARG' do |arg|
@@ -489,16 +494,20 @@ HERE
         else
           fail UsageError, "invalid crop geometry: #{arg}"
         end
+
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--720p' do
         @max_width  = 1280
         @max_height = 720
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--1080p' do
         @max_width  = 1920
         @max_height = 1080
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--deinterlace' do
@@ -527,6 +536,7 @@ HERE
 
         @detelecine = false
         @enable_filters = false
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--detelecine' do
@@ -534,10 +544,25 @@ HERE
         @deinterlace = false
         @rate = nil
         @enable_filters = false
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--no-filters' do
         @enable_filters = false
+      end
+
+      opts.on '--copy-video' do
+        @encoder = 'copy'
+        @hevc = false
+        @ten_bit = nil
+        @preset = nil
+        @target = nil
+        @crop = nil
+        @deinterlace = false
+        @rate = nil
+        @detelecine = false
+        @enable_filters = false
+        @burn_subtitle_track = 0
       end
 
       opts.on '--vt-allow-sw' do
@@ -703,6 +728,8 @@ HERE
         else
           fail UsageError, "invalid subtitle track: #{arg}"
         end
+
+        @encoder = nil if @encoder == 'copy'
       end
     end
 
@@ -762,7 +789,7 @@ HERE
       else
         @encoder.sub!(/^h264/, 'hevc') if @hevc
 
-        unless @dry_run or encoders =~ /#{@encoder}/
+        unless @dry_run or @encoder == 'copy' or encoders =~ /#{@encoder}/
           fail "video encoder not available: #{@encoder}"
         end
       end
@@ -1402,12 +1429,16 @@ HERE
         conversion_filter = nil
       end
 
-      filter =  overlay_filter.nil?     ? '' : overlay_filter
-      filter += frame_rate_filter.nil?  ? '' : ",#{frame_rate_filter}"
-      filter += crop_filter.nil?        ? '' : ",#{crop_filter}"
-      filter += scale_filter.nil?       ? '' : ",#{scale_filter}"
-      filter += conversion_filter.nil?  ? '' : ",#{conversion_filter}"
-      filter.sub!(/^,/, '')
+      if @encoder == 'copy'
+        filter = ''
+      else
+        filter =  overlay_filter.nil?     ? '' : overlay_filter
+        filter += frame_rate_filter.nil?  ? '' : ",#{frame_rate_filter}"
+        filter += crop_filter.nil?        ? '' : ",#{crop_filter}"
+        filter += scale_filter.nil?       ? '' : ",#{scale_filter}"
+        filter += conversion_filter.nil?  ? '' : ",#{conversion_filter}"
+        filter.sub!(/^,/, '')
+      end
 
       if overlay_filter.nil?
         encode_options = [
@@ -1490,8 +1521,12 @@ HERE
       end
 
       Kernel.warn 'Stream mapping:'
-      text = "#{sprintf("%2d", video['index'])} = #{@encoder} / #{bitrate} Kbps"
-      text += " / #{preset}" unless preset.nil?
+      text = "#{sprintf("%2d", video['index'])} = #{@encoder}"
+
+      unless @encoder == 'copy'
+        text += " / #{bitrate} Kbps"
+        text += " / #{preset}" unless preset.nil?
+      end
 
       unless burn_subtitle.nil?
         text += " / #{sprintf("%d", burn_subtitle['index'])} = #{burn_subtitle['codec_name']} / burn"
@@ -1500,7 +1535,7 @@ HERE
       Kernel.warn text
       encode_options += ['-c:v', @encoder]
       encode_options += ['-pix_fmt:v', (@encoder =~ /(nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if @ten_bit
-      encode_options += ['-b:v', "#{bitrate}k"]
+      encode_options += ['-b:v', "#{bitrate}k"] unless @encoder == 'copy'
       encode_options += ['-maxrate:v', "#{maxrate}k"] if @encoder =~ /(nvenc|hevc_qsv|libx26[45])$/
       encode_options += ['-bufsize:v', "#{maxrate}k"] if @encoder =~ /^libx26[45]$/
       encode_options += ['-preset:v', preset] unless preset.nil?
@@ -1571,10 +1606,15 @@ HERE
         encode_options += ['-profile:v', 'high'] if @encoder =~ /^(h264_nvenc|h264_amf|libx264)$/
       end
 
+      unless @encoder == 'copy'
+        encode_options += [
+          '-color_primaries:v', color_primaries,
+          '-color_trc:v', color_trc,
+          '-colorspace:v', colorspace
+        ]
+      end
+
       encode_options += [
-        '-color_primaries:v', color_primaries,
-        '-color_trc:v', color_trc,
-        '-colorspace:v', colorspace,
         '-metadata:s:v', 'title=',
         '-disposition:v', 'default'
       ]
