@@ -1295,13 +1295,7 @@ HERE
         overlay_filter = nil
       else
         overlay_filter = "[0:#{burn_subtitle['index']}]overlay"
-
-        unless cuvid_decoder.nil?
-          Kernel.warn '**********'
-          Kernel.warn "burning subtitle disables video decoder: #{cuvid_decoder}"
-          Kernel.warn '**********'
-          cuvid_decoder = nil
-        end
+        cuvid_decoder = nil
       end
 
       deinterlace = @deinterlace
@@ -1334,14 +1328,8 @@ HERE
       end
 
       if @detelecine
-        unless cuvid_decoder.nil?
-          Kernel.warn '**********'
-          Kernel.warn "detelecine disables video decoder: #{cuvid_decoder}"
-          Kernel.warn '**********'
-          cuvid_decoder = nil
-        end
-
         frame_rate_filter = 'fieldmatch=order=tff:combmatch=none,decimate'
+        cuvid_decoder = nil
       end
 
       width   = video['width'].to_i
