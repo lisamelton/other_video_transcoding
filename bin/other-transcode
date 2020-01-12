@@ -514,6 +514,7 @@ HERE
         @deinterlace = true
         @detelecine = false
         @enable_filters = false
+        @encoder = nil if @encoder == 'copy' and @decoder_type != :cuvid
       end
 
       opts.on '--rate ARG' do |arg|
@@ -558,7 +559,6 @@ HERE
         @preset = nil
         @target = nil
         @crop = nil
-        @deinterlace = false
         @rate = nil
         @detelecine = false
         @enable_filters = false
@@ -1315,7 +1315,7 @@ HERE
 
       if deinterlace
         if cuvid_decoder.nil?
-          frame_rate_filter = 'yadif=deint=interlaced'
+          frame_rate_filter = 'yadif=deint=interlaced' unless @encoder == 'copy'
         else
           cuvid_options += ['-deint:v', 'adaptive']
         end
