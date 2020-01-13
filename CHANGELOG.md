@@ -2,6 +2,17 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.2.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.2.0)
+
+Monday, January 13, 2020
+
+* Allow `all` to be used as an argument to the `--add-audio` and `--add-subtitle` options of `other-transcode`, adding all audio tracks or all subtitle tracks. Via [ #3](https://github.com/donmelton/other_video_transcoding/issues/3).
+* Add `original` as a width attribute to the `--main-audio` and `--add-audio` options of `other-transcode`. Unlike `stereo` and `surround`, this disables transcoding and always copies the selected track(s). Via [ #5](https://github.com/donmelton/other_video_transcoding/issues/5).
+* Add a `--copy-video` option to `other-transcode`. This disables transcoding and copies the original video track to the output.
+* No longer ignore any image-based subtitles added to MP4 output. Instead, let `ffmpeg` foolishly add DVD-style subtitles and (currently) fail when adding Blu-ray Disc-style subtitles.
+* Deprecate the `--name` option of `other-transcode` because it doesn't make sense to name only the first output file from a tool which can take multiple inputs. The option still works for now, but using it issues a warning message. It will be removed in a future release.
+* Remove warnings when other options disable the Nvidia video decoder, which could only happen if the `--burn-subtitle` or `--detelecine` options were used with the `--cuvid` option.
+
 ## [0.1.1](https://github.com/donmelton/other_video_transcoding/releases/tag/0.1.1)
 
 Friday, January 3, 2020
