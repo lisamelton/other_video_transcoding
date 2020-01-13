@@ -1867,9 +1867,6 @@ HERE
       subtitles.each do |subtitle|
         next if (not burn_subtitle.nil?) and burn_subtitle['index'] == subtitle['index']
 
-        next if @format == :mp4 and
-          (subtitle['codec_name'] == 'hdmv_pgs_subtitle' or subtitle['codec_name'] == 'dvd_subtitle')
-
         force = (index == 0 and not force_subtitle.nil?)
         text = "#{sprintf("%2d", subtitle['index'])} = #{subtitle['codec_name']}"
         text += ' / force' if force
