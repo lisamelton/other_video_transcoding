@@ -62,6 +62,10 @@ See "[Download FFmpeg](https://ffmpeg.org/download.html)," "[MKVToolNix Download
 
 Additional documentation for installing these programs on Windows is available in the [wiki](https://github.com/donmelton/other_video_transcoding/wiki/Windows).
 
+A [Docker](https://en.wikipedia.org/wiki/Docker_(software)) container for Linux, including installation instructions, is available here:
+
+https://github.com/ttyS0/docker-transcode-vaapi
+
 On macOS, all of these programs can be easily installed via [Homebrew](http://brew.sh/), an optional package manager:
 
     brew install ffmpeg
