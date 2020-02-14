@@ -257,7 +257,6 @@ HERE
       @detect = false
       @preview = false
       @format = :mkv
-      @name = nil
       @copy_track_names = false
       @max_muxing_queue_size = nil
       @dry_run = false
@@ -382,13 +381,6 @@ HERE
 
       opts.on '--mp4' do
         @format = :mp4
-      end
-
-      opts.on '--name ARG' do |arg|
-        @name = arg
-        Kernel.warn '**********'
-        Kernel.warn 'Using deprecated option: --name'
-        Kernel.warn '**********'
       end
 
       opts.on '--copy-track-names' do
@@ -889,7 +881,7 @@ HERE
       seconds = Time.now.tv_sec
 
       unless @detect
-        output_path = (@name.nil? ? File.basename(path, '.*') : File.basename(@name)) + '.' + @format.to_s
+        output_path = File.basename(path, '.*') + '.' + @format.to_s
         fail "output file already exists: #{output_path}" if File.exist? output_path
 
         log_path = output_path + '.log'
