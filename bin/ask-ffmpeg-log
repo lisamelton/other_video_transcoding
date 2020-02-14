@@ -65,6 +65,7 @@ HERE
       end
 
       fail UsageError, 'missing argument' if ARGV.empty?
+
       ARGV.each { |arg| process_input arg }
       complete
       exit
@@ -92,10 +93,12 @@ HERE
       if File.directory? input
         logs = Dir[input + File::SEPARATOR + '*.log']
         fail "does not contain `.log` files: #{input}" if logs.empty?
+
         @logs += logs
         @paths << input
       else
         fail "not a `.log` file: #{input}" unless File.extname(input) == '.log'
+
         @logs << File.absolute_path(input)
         @paths << File.dirname(input)
       end

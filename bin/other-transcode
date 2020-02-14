@@ -341,6 +341,7 @@ HERE
       end
 
       fail UsageError, 'missing argument' if ARGV.empty?
+
       configure ARGV.first
       ARGV.each { |arg| process_input arg }
       exit
@@ -888,8 +889,7 @@ HERE
       seconds = Time.now.tv_sec
 
       unless @detect
-        output_path = (@name.nil? ? File.basename(path, '.*') : File.basename(@name)) +
-                      '.' + @format.to_s
+        output_path = (@name.nil? ? File.basename(path, '.*') : File.basename(@name)) + '.' + @format.to_s
         fail "output file already exists: #{output_path}" if File.exist? output_path
 
         log_path = output_path + '.log'
@@ -911,7 +911,7 @@ HERE
         crop = detect_crop(media_info, video)
 
         if @detect
-          present_crop(crop, path)
+          present_crop crop, path
           return
         else
           Kernel.warn "crop = #{crop[:width]}:#{crop[:height]}:#{crop[:x]}:#{crop[:y]}"
@@ -944,7 +944,7 @@ HERE
         '-stats'
       ] + time_options +
           decode_options + [
-        '-i', "#{path}"
+        '-i', path
       ] + (@max_muxing_queue_size.nil? ? [] : ['-max_muxing_queue_size', @max_muxing_queue_size.to_s]) +
           encode_options +
           get_audio_options(media_info) +
@@ -995,12 +995,12 @@ HERE
         FileUtils.mv tmp_log_path, log_path
       end
 
-      assemble_log(log_path, output)
+      assemble_log log_path, output
 
       if @format == :mp4
         Kernel.warn 'Done.'
       else
-        add_track_statistics_tags(output_path)
+        add_track_statistics_tags output_path
       end
 
       Kernel.warn "\nElapsed time: #{seconds_to_time(Time.now.tv_sec - seconds)}\n\n"
@@ -1505,6 +1505,7 @@ HERE
         end
 
         fail "invalid preset for encoder: #{@preset}" unless valid
+
         preset = @preset
       end
 
@@ -1652,6 +1653,7 @@ HERE
         end
 
         width = selection[:width]
+
         bitrate = case width
         when :stereo
           @stereo_bitrate
@@ -1856,10 +1858,7 @@ HERE
         end
       end
 
-      unless force_subtitle.nil?
-        subtitles = [force_subtitle] + subtitles
-      end
-
+      subtitles = [force_subtitle] + subtitles unless force_subtitle.nil?
       subtitles.uniq!
       options = []
       index = 0
