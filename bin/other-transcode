@@ -223,6 +223,18 @@ HERE
                     set surround audio bitrate (default: 640)
     --stereo-bitrate BITRATE
                     set stereo audio bitrate (default: 256)
+HERE
+    end
+
+    def usage16
+      <<HERE
+    --mono-bitrate BITRATE
+                    set mono audio bitrate (default: 50% of stereo bitrate)
+HERE
+    end
+
+    def usage17
+      <<HERE
     --eac3          use Enhanced AC-3 format for surround audio
 
 Subtitle options:
@@ -304,6 +316,7 @@ HERE
       }]
       @surround_bitrate = 640
       @stereo_bitrate = 256
+      @mono_bitrate = nil
       @surround_encoder = 'ac3'
       @stereo_encoder = nil
       @subtitle_selections = []
@@ -321,12 +334,12 @@ HERE
             when 'full'
               puts  usage1 + usage2 + usage3 + usage4 + usage5 + usage6 +
                     usage7 + usage8 + usage9 + usage10 + usage11 + usage12 +
-                    usage13 + usage14 + usage15
+                    usage13 + usage14 + usage15 + usage16 + usage17
             when 'more'
-              puts  usage1 + usage2 + usage3 + usage4 + usage6 + usage7 +
-                    usage8 + usage9 + usage11 + usage13 + usage15
+              puts  usage1 + usage2 + usage3 + usage4 + usage6 + usage7 + usage8 +
+                    usage9 + usage11 + usage13 + usage15 + usage16 + usage17
             else
-              puts  usage1 + usage3 + usage6 + usage8 + usage11 + usage13 + usage15
+              puts  usage1 + usage3 + usage6 + usage8 + usage11 + usage13 + usage15 + usage17
             end
 
             exit
@@ -698,6 +711,10 @@ HERE
         @stereo_bitrate = arg
       end
 
+      opts.on '--mono-bitrate ARG', Integer do |arg|
+        @mono_bitrate = arg
+      end
+
       opts.on '--eac3' do
         @surround_encoder = 'eac3'
       end
@@ -754,6 +771,12 @@ HERE
       @subtitle_selections.uniq!
       @surround_bitrate = [[@surround_bitrate, 256].max, (@surround_encoder == 'ac3' ? 640 : 768)].min
       @stereo_bitrate = [[@stereo_bitrate, 128].max, 256].min
+
+      if @mono_bitrate.nil?
+        @mono_bitrate = @stereo_bitrate / 2
+      else
+        @mono_bitrate = [[@mono_bitrate, 64].max, 256].min
+      end
 
       [
         ['ffprobe', '-loglevel', 'quiet', '-version'],
@@ -1823,7 +1846,7 @@ HERE
               if input_channels > 2
                 channels = 2
               elsif input_channels == 1
-                bitrate = @stereo_bitrate / 2
+                bitrate = @mono_bitrate
               end
             end
           end
