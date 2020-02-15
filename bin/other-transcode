@@ -51,6 +51,7 @@ HERE
       <<HERE
 Output options:
     --debug         increase diagnostic information
+    --scan          print media information and exit
     --preview-crop  show commands to preview detected video crop and exit
 HERE
     end
@@ -254,6 +255,7 @@ HERE
       @position = nil
       @duration = nil
       @debug = false
+      @scan = false
       @detect = false
       @preview = false
       @format = :mkv
@@ -367,6 +369,10 @@ HERE
 
       opts.on '--debug' do
         @debug = true
+      end
+
+      opts.on '--scan' do
+        @scan = true
       end
 
       opts.on '--preview-crop' do
@@ -757,7 +763,7 @@ HERE
         verify_tool_availability command
       end
 
-      return if @detect
+      return if @scan or @detect
 
       encoders = find_encoders
 
@@ -880,7 +886,7 @@ HERE
     def process_input(path)
       seconds = Time.now.tv_sec
 
-      unless @detect
+      unless @scan or @detect
         output_path = File.basename(path, '.*') + '.' + @format.to_s
         fail "output file already exists: #{output_path}" if File.exist? output_path
 
@@ -892,6 +898,11 @@ HERE
       end
 
       media_info = scan_media(path)
+
+      if @scan
+        print_media_info media_info
+        return
+      end
 
       video, burn_subtitle = get_video_streams(media_info)
       fail "video track not found: #{path}" if video.nil?
@@ -1030,6 +1041,70 @@ HERE
 
       Kernel.warn media_info.inspect if @debug
       media_info
+    end
+
+    def print_media_info(media_info)
+      video = nil
+      audio_streams = []
+      subtitles = []
+
+      media_info['streams'].each do |stream|
+        case stream['codec_type']
+        when 'video'
+          video = stream if video.nil?
+        when 'audio'
+          audio_streams += [stream]
+        when 'subtitle'
+          subtitles += [stream]
+        end
+      end
+
+      puts media_info['format']['filename']
+      size = "#{video['width']} x #{video['height']}"
+      puts "      format = #{video['codec_name']} / #{size} / #{video['avg_frame_rate']} fps"
+      duration = media_info['format']['duration'].to_f
+      time = seconds_to_time(duration.to_i)
+      milliseconds = duration.to_s.sub(/^[0-9]+(\.[0-9]+)$/, '\1')
+      time += milliseconds unless milliseconds == '.0'
+      puts "    duration = #{time}"
+      index = 0
+
+      audio_streams.each do |stream|
+        index += 1
+        puts "\##{index} audio:"
+        print "      format = #{stream['codec_name']} / "
+        layout = stream.fetch('channel_layout', '')
+
+        if layout.empty?
+          channels = stream['channels'].to_i
+          puts "#{channels} " + (channels > 1 ? 'channels' : 'channel')
+        else
+          puts "#{layout}"
+        end
+
+        puts "    language = #{stream.fetch('tags', {}).fetch('language', '')}"
+        title = stream.fetch('tags', {}).fetch('title', '')
+        puts "       title = #{title}" unless title.empty?
+      end
+
+      index = 0
+
+      subtitles.each do |stream|
+        index += 1
+        puts "\##{index} subtitle:"
+        puts "    language = #{stream.fetch('tags', {}).fetch('language', '')}"
+        title = stream.fetch('tags', {}).fetch('title', '')
+        puts "       title = #{title}" unless title.empty?
+        default = (stream['disposition']['default'] == 1)
+        forced  = (stream['disposition']['forced'] == 1)
+
+        if default or forced
+          puts '       flags = ' +
+            (default ? 'default' : '') +
+            ((default and forced) ? ' / ' : '') +
+            (forced ? 'forced' : '')
+        end
+      end
     end
 
     def detect_crop(media_info, video)
