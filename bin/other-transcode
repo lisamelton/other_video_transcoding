@@ -770,12 +770,12 @@ HERE
       @audio_selections.uniq!
       @subtitle_selections.uniq!
       @surround_bitrate = [[@surround_bitrate, 256].max, (@surround_encoder == 'ac3' ? 640 : 768)].min
-      @stereo_bitrate = [[@stereo_bitrate, 128].max, 256].min
+      @stereo_bitrate = [[@stereo_bitrate, 128].max, 576].min
 
       if @mono_bitrate.nil?
         @mono_bitrate = @stereo_bitrate / 2
       else
-        @mono_bitrate = [[@mono_bitrate, 64].max, 256].min
+        @mono_bitrate = [[@mono_bitrate, 64].max, 288].min
       end
 
       [
