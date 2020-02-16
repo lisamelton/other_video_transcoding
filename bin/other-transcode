@@ -236,6 +236,17 @@ HERE
     def usage17
       <<HERE
     --eac3          use Enhanced AC-3 format for surround audio
+HERE
+    end
+
+    def usage18
+      <<HERE
+    --all-eac3       "     "      "     "     "  all audio
+HERE
+    end
+
+    def usage19
+      <<HERE
 
 Subtitle options:
     --add-subtitle TRACK[=forced]|auto|all|LANGUAGE|STRING
@@ -334,12 +345,15 @@ HERE
             when 'full'
               puts  usage1 + usage2 + usage3 + usage4 + usage5 + usage6 +
                     usage7 + usage8 + usage9 + usage10 + usage11 + usage12 +
-                    usage13 + usage14 + usage15 + usage16 + usage17
+                    usage13 + usage14 + usage15 + usage16 + usage17 +
+                    usage18 + usage19
             when 'more'
-              puts  usage1 + usage2 + usage3 + usage4 + usage6 + usage7 + usage8 +
-                    usage9 + usage11 + usage13 + usage15 + usage16 + usage17
+              puts  usage1 + usage2 + usage3 + usage4 + usage6 + usage7 +
+                    usage8 + usage9 + usage11 + usage13 + usage15 + usage16 +
+                    usage17 + usage18 + usage19
             else
-              puts  usage1 + usage3 + usage6 + usage8 + usage11 + usage13 + usage15 + usage17
+              puts  usage1 + usage3 + usage6 + usage8 + usage11 + usage13 +
+                    usage15 + usage17 + usage19
             end
 
             exit
@@ -719,6 +733,11 @@ HERE
         @surround_encoder = 'eac3'
       end
 
+      opts.on '--all-eac3' do
+        @surround_encoder = 'eac3'
+        @stereo_encoder   = 'eac3'
+      end
+
       opts.on '--add-subtitle ARG' do |arg|
         if arg =~ /^([0-9]+)(?:=(forced))?$|^(auto)$|^([a-z]{3})$|^(.*)$/
           @subtitle_selections += [{
@@ -770,12 +789,12 @@ HERE
       @audio_selections.uniq!
       @subtitle_selections.uniq!
       @surround_bitrate = [[@surround_bitrate, 256].max, (@surround_encoder == 'ac3' ? 640 : 768)].min
-      @stereo_bitrate = [[@stereo_bitrate, 128].max, 576].min
+      @stereo_bitrate = [[@stereo_bitrate, 128].max, (@stereo_encoder == 'eac3' ? 768 : 576)].min
 
       if @mono_bitrate.nil?
         @mono_bitrate = @stereo_bitrate / 2
       else
-        @mono_bitrate = [[@mono_bitrate, 64].max, 288].min
+        @mono_bitrate = [[@mono_bitrate, 64].max, (@stereo_encoder == 'eac3' ? 768 : 288)].min
       end
 
       [
