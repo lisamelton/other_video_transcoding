@@ -175,6 +175,7 @@ Video Acceleration API encoder options:
 
 x264 software video encoder options:
     --x264-avbr     use average variable bitrate (AVBR) ratecontrol
+    --x264-mbtree   use macroblock-tree ratecontrol (disables AVBR if in use)
     --x264-quick    increase encoding speed by 70-80%
                       with no easily perceptible loss in video quality
                       (avoids quality problems with some encoder presets)
@@ -323,6 +324,7 @@ HERE
       @amf_bframes = nil
       @vaapi_compression = nil
       @x264_avbr = false
+      @x264_mbtree = false
       @x264_quick = false
       @audio_selections = [{
         :track => 1,
@@ -686,6 +688,14 @@ HERE
         @encoder = 'libx264'
         @hevc = false
         @x264_avbr = true
+        @x264_mbtree = false
+      end
+
+      opts.on '--x264-mbtree' do
+        @encoder = 'libx264'
+        @hevc = false
+        @x264_mbtree = true
+        @x264_avbr = false
       end
 
       opts.on '--x264-quick' do
@@ -1719,7 +1729,7 @@ HERE
 
       if @encoder == 'libx264'
         encode_options += ['-x264opts:v', 'ratetol=inf'] if @x264_avbr
-        encode_options += ['-mbtree:v', '0']
+        encode_options += ['-mbtree:v', '0'] unless @x264_mbtree
 
         if @preset.nil? and @x264_quick
           encode_options += [
