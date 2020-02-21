@@ -131,6 +131,9 @@ HERE
 
     def usage10
       <<HERE
+    --rc-maxrate FACTOR, --rc-bufsize FACTOR
+                    set ratecontrol maximum rate and/or buffer size
+                      as multiple of video bitrate target
     --copy-video    disable transcoding and copy original video track
 
 Apple Video Toolbox encoder options:
@@ -303,6 +306,8 @@ HERE
       @rate = nil
       @detelecine = false
       @enable_filters = true
+      @maxrate = nil
+      @bufsize = nil
       @vt_allow_sw = false
       @nvenc_spatial_aq = nil
       @nvenc_temporal_aq = nil
@@ -576,6 +581,16 @@ HERE
 
       opts.on '--no-filters' do
         @enable_filters = false
+      end
+
+      opts.on '--rc-maxrate ARG', Float do |arg|
+        @maxrate = arg
+        @encoder = nil if @encoder == 'copy'
+      end
+
+      opts.on '--rc-bufsize ARG', Float do |arg|
+        @bufsize = arg
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--copy-video' do
@@ -1587,7 +1602,22 @@ HERE
 
       bitrate = @target unless @target.nil?
       bitrate = [bitrate, max_bitrate].min
-      maxrate = bitrate * 3
+      maxrate = 0
+      bufsize = 0
+
+      if @encoder =~ /(nvenc|hevc_qsv|libx26[45])$/
+        if @maxrate.nil?
+          maxrate = bitrate * 3
+        else
+          maxrate = [[(bitrate * @maxrate).to_i, (bitrate * 1.5).to_i].max, bitrate * 3].min
+        end
+
+        if @bufsize.nil?
+          bufsize = maxrate if @encoder =~ /^libx26[45]$/
+        else
+          bufsize = [[(bitrate * @bufsize).to_i, bitrate].max, bitrate * 4].min
+        end
+      end
 
       if @preset.nil? or @preset == 'none'
         preset = nil
@@ -1634,8 +1664,8 @@ HERE
       encode_options += ['-c:v', @encoder]
       encode_options += ['-pix_fmt:v', (@encoder =~ /(nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if @ten_bit
       encode_options += ['-b:v', "#{bitrate}k"] unless @encoder == 'copy'
-      encode_options += ['-maxrate:v', "#{maxrate}k"] if @encoder =~ /(nvenc|hevc_qsv|libx26[45])$/
-      encode_options += ['-bufsize:v', "#{maxrate}k"] if @encoder =~ /^libx26[45]$/
+      encode_options += ['-maxrate:v', "#{maxrate}k"] if maxrate > 0
+      encode_options += ['-bufsize:v', "#{bufsize}k"] if bufsize > 0
       encode_options += ['-preset:v', preset] unless preset.nil?
       encode_options += ['-allow_sw:v', '1'] if @encoder =~ /videotoolbox$/ and @vt_allow_sw
 
