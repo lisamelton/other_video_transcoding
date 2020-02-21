@@ -246,6 +246,7 @@ HERE
     def usage18
       <<HERE
     --all-eac3       "     "      "     "     "  all audio
+    --pass-dts      enable passthrough of audio in standard DTS format
 HERE
     end
 
@@ -337,6 +338,7 @@ HERE
       @mono_bitrate = nil
       @surround_encoder = 'ac3'
       @stereo_encoder = nil
+      @pass_dts = false
       @subtitle_selections = []
       @auto_add_subtitle = false
       @burn_subtitle_track = 0
@@ -761,6 +763,10 @@ HERE
       opts.on '--all-eac3' do
         @surround_encoder = 'eac3'
         @stereo_encoder   = 'eac3'
+      end
+
+      opts.on '--pass-dts' do
+        @pass_dts = true
       end
 
       opts.on '--add-subtitle ARG' do |arg|
@@ -1885,7 +1891,9 @@ HERE
             encoder = 'copy'
         else
           if track[:width] == :surround
-            if codec_name == @surround_encoder or codec_name == 'ac3'
+            if  codec_name == @surround_encoder or
+                codec_name == 'ac3' or
+                (@pass_dts and codec_name == 'dts' and track[:stream].fetch('profile', 'DTS') == 'DTS')
               encoder = 'copy'
             elsif input_channels > 2
               encoder = @surround_encoder
@@ -1894,9 +1902,10 @@ HERE
           end
 
           if encoder.nil?
-            if input_channels <= 2 and (codec_name == 'aac' or
+            if  input_channels <= 2 and (codec_name == 'aac' or
                 ((codec_name == @surround_encoder or codec_name == 'ac3') and
-                (track[:stream]['bit_rate'].to_i / 1000) <= @stereo_bitrate))
+                (track[:stream]['bit_rate'].to_i / 1000) <= @stereo_bitrate) or
+                (@pass_dts and codec_name == 'dts' and track[:stream].fetch('profile', 'DTS') == 'DTS'))
               encoder = 'copy'
             else
               encoder = @stereo_encoder
