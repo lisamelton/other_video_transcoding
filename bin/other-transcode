@@ -1145,7 +1145,15 @@ HERE
       audio_streams.each do |stream|
         index += 1
         puts "\##{index} audio:"
-        print "      format = #{stream['codec_name']} / "
+        codec_name = stream['codec_name']
+        print "      format = #{codec_name}"
+
+        if codec_name == 'dts'
+          profile = stream.fetch('profile', 'DTS')
+          print " (#{profile})" unless profile == 'DTS'
+        end
+
+        print ' / '
         layout = stream.fetch('channel_layout', '')
 
         if layout.empty?
