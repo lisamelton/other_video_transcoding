@@ -246,6 +246,9 @@ HERE
     def usage18
       <<HERE
     --all-eac3       "     "      "     "     "  all audio
+    --keep-ac3-stereo
+                    copy stereo and mono audio in AC-3 format
+                      even when orginal bitrate is above transcoding bitrate
     --pass-dts      enable passthrough of audio in standard DTS format
 HERE
     end
@@ -338,6 +341,7 @@ HERE
       @mono_bitrate = nil
       @surround_encoder = 'ac3'
       @stereo_encoder = nil
+      @keep_ac3_stereo = false
       @pass_dts = false
       @subtitle_selections = []
       @auto_add_subtitle = false
@@ -763,6 +767,10 @@ HERE
       opts.on '--all-eac3' do
         @surround_encoder = 'eac3'
         @stereo_encoder   = 'eac3'
+      end
+
+      opts.on '--keep-ac3-stereo' do
+        @keep_ac3_stereo = true
       end
 
       opts.on '--pass-dts' do
@@ -1912,7 +1920,7 @@ HERE
           if encoder.nil?
             if  input_channels <= 2 and (codec_name == 'aac' or
                 ((codec_name == @surround_encoder or codec_name == 'ac3') and
-                (track[:stream]['bit_rate'].to_i / 1000) <= @stereo_bitrate) or
+                (@keep_ac3_stereo or (track[:stream]['bit_rate'].to_i / 1000) <= @stereo_bitrate)) or
                 (@pass_dts and codec_name == 'dts' and track[:stream].fetch('profile', 'DTS') == 'DTS'))
               encoder = 'copy'
             else
