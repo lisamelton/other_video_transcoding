@@ -1616,15 +1616,19 @@ HERE
       if width > 1920 or height > 1080
         bitrate = @target_2160p
         max_bitrate = 40000
+        max_dpb_mbs = 184320
       elsif width > 1280 or height > 720
         bitrate = @target_1080p
         max_bitrate = 20000
+        max_dpb_mbs = 32768
       elsif width > 720 or height > 576
         bitrate = @target_720p
         max_bitrate = 10000
+        max_dpb_mbs = 18000
       else
         bitrate = @target_480p
         max_bitrate = 5000
+        max_dpb_mbs = 8100
 
         unless hdr
           color_primaries = pal ? 'bt470bg' : 'smpte170m'
@@ -1753,12 +1757,29 @@ HERE
         encode_options += ['-x264opts:v', 'ratetol=inf'] if @x264_avbr
         encode_options += ['-mbtree:v', '0'] unless @x264_mbtree
 
-        if @preset.nil? and @x264_quick
-          encode_options += [
-            '-refs:v', '1',
-            '-rc-lookahead:v', '30',
-            '-partitions:v', 'none'
-          ]
+        if @preset.nil?
+          if @x264_quick
+            encode_options += [
+              '-refs:v', '1',
+              '-rc-lookahead:v', '30',
+              '-partitions:v', 'none'
+            ]
+          end
+        else
+          max_refs = [(max_dpb_mbs / (((width + 15) / 16) * ((height + 15) / 16))), 16].min
+
+          case @preset
+          when 'slow'
+            refs = 5
+          when 'slower'
+            refs = 8
+          when 'veryslow', 'placebo'
+            refs = 16
+          else
+            refs = 0
+          end
+
+          encode_options += ['-refs:v', max_refs.to_s] if refs > max_refs
         end
       end
 
