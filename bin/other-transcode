@@ -1142,7 +1142,9 @@ HERE
 
       puts media_info['format']['filename']
       size = "#{video['width']} x #{video['height']}"
-      puts "      format = #{video['codec_name']} / #{size} / #{video['avg_frame_rate']} fps"
+      print "      format = #{video['codec_name']} / #{size} / #{video['avg_frame_rate']} fps"
+      bitrate = get_bitrate(video)
+      puts bitrate.nil? ? '' : " / #{bitrate} Kbps"
       duration = media_info['format']['duration'].to_f
       time = seconds_to_time(duration.to_i)
       milliseconds = duration.to_s.sub(/^[0-9]+(\.[0-9]+)$/, '\1')
@@ -1166,11 +1168,13 @@ HERE
 
         if layout.empty?
           channels = stream['channels'].to_i
-          puts "#{channels} " + (channels > 1 ? 'channels' : 'channel')
+          print "#{channels} " + (channels > 1 ? 'channels' : 'channel')
         else
-          puts "#{layout}"
+          print "#{layout}"
         end
 
+        bitrate = get_bitrate(stream)
+        puts bitrate.nil? ? '' : " / #{bitrate} Kbps"
         puts "    language = #{stream.fetch('tags', {}).fetch('language', '')}"
         title = stream.fetch('tags', {}).fetch('title', '')
         puts "       title = #{title}" unless title.empty?
@@ -1194,6 +1198,14 @@ HERE
             (forced ? 'forced' : '')
         end
       end
+    end
+
+    def get_bitrate(stream)
+      bitrate = stream.fetch('bit_rate', '')
+      bitrate = stream.fetch('tags', {}).fetch('BPS-eng', '') if bitrate.empty?
+      return nil if bitrate.empty?
+
+      bitrate.to_i / 1000
     end
 
     def detect_crop(media_info, video)
