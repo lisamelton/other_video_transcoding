@@ -1185,7 +1185,9 @@ HERE
       subtitles.each do |stream|
         index += 1
         puts "\##{index} subtitle:"
-        puts "      format = #{stream['codec_name']}"
+        print "      format = #{stream['codec_name']}"
+        frames = stream.fetch('tags', {}).fetch('NUMBER_OF_FRAMES-eng', '')
+        puts frames.empty? ? '' : " / #{frames} " + (frames == 1 ? 'frame' : 'frames')
         puts "    language = #{stream.fetch('tags', {}).fetch('language', '')}"
         title = stream.fetch('tags', {}).fetch('title', '')
         puts "       title = #{title}" unless title.empty?
