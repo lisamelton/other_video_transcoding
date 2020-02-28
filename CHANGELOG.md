@@ -2,6 +2,22 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.3.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.3.0)
+
+Thursday, February 27, 2020
+
+* Add a `--scan` option to `other-transcode`. This prints media information and then exits, allowing easy identification of track numbers and formats. Via [ #11](https://github.com/donmelton/other_video_transcoding/issues/11).
+* Add a `--mono-bitrate` option to `other-transcode`. This sets the mono audio bitrate, which is otherwise 50% of the stereo bitrate.
+* Raise the maximum bitrates for audio in AAC format to 320 Kbps for stereo and 256 Kbps for mono. The default birates remain the same.
+* Add a `--all-eac3` option to `other-transcode`. This uses the Dolby Digital Plus (Enhanced AC-3) format for all transcoded audio. The behavior of the `--eac3` option, which uses Dolby Digital Plus for surround audio only, remains the same.
+* Add a `--keep-ac3-stereo` option to `other-transcode`. This copies stereo and mono audio in AC-3 format even when the original source bitrate is above the output transcoding bitrate.
+* Add a `--pass-dts` option to `other-transcode`. This enables passthrough of audio in DTS and DTS-ES formats. However, such audio also in surround format will still be transcoded if that audio is output to a stereo-width track.
+* Add `--rc-maxrate` and `--rc-bufsize` options to `other-transcode`. These set the ratecontrol maximum rate and/or the buffer size as a multiple of the video bitrate target, but only for certain encoders and ratecontrol systems.
+* Add a `--x264-mbtree` option to `other-transcode`. This uses macroblock-tree ratecontrol and disables AVBR if in use.
+* In order to ensure compatible H.264 levels, limit the number of reference frames when using the `x264` encoder with slower presets.
+* Remove the deprecated `--name` option of `other-transcode`.
+* Add a link to a Docker container for Linux in the "README" document. Thanks, @ttyS0!
+
 ## [0.2.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.2.0)
 
 Monday, January 13, 2020
