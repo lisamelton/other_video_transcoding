@@ -874,7 +874,7 @@ HERE
         end
       end
 
-      @ten_bit = (@hevc and @encoder =~ /(nvenc|qsv|x265)$/ ? true : false) if @ten_bit.nil?
+      @ten_bit = (@hevc and @encoder =~ /(nvenc|qsv|vaapi|x265)$/ ? true : false) if @ten_bit.nil?
       @target_2160p ||= (@hevc and @ten_bit) ? 12000 : 16000
       @target_1080p ||= (@hevc and @ten_bit) ? 6000  : 8000
       @target_720p  ||= (@hevc and @ten_bit) ? 3000  : 4000
