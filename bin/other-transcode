@@ -1333,10 +1333,10 @@ HERE
         drawbox_string = "#{crop[:x]}:#{crop[:y]}:#{crop[:width]}:#{crop[:height]}"
         puts
         puts escape_command([
-          'mpv', '--no-audio', '--vf', "lavfi=[drawbox=#{drawbox_string}:invert:1]", path
+          'mpv', '--no-audio', "--vf=lavfi=[drawbox=#{drawbox_string}:invert:1]", path
         ])
         puts escape_command([
-          'mpv', '--no-audio', '--vf', "crop=#{crop_string}", path
+          'mpv', '--no-audio', "--vf=crop=#{crop_string}", path
         ])
         puts
         puts escape_command([
