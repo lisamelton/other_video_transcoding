@@ -1476,7 +1476,7 @@ HERE
         if video['avg_frame_rate'] == '30000/1001' or video['field_order'] != 'progressive'
           deinterlace = true
 
-          if video['codec_name'] == 'mpeg2video'
+          if video['codec_name'] == 'mpeg2video' and video['avg_frame_rate'] != '25/1'
             rate = '24000/1001'
           end
         end
