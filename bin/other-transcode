@@ -969,13 +969,13 @@ HERE
 
       unless @scan or @detect
         output_path = File.basename(path, '.*') + '.' + @format.to_s
-        fail "output file already exists: #{output_path}" if File.exist? output_path
+        fail_or_warn "output file already exists: #{output_path}" if File.exist? output_path
 
         log_path = output_path + '.log'
-        fail "log file already exists: #{log_path}" if File.exist? log_path
+        fail_or_warn "log file already exists: #{log_path}" if File.exist? log_path
 
         tmp_log_path = "_ffmpeg_#{rand(10000..99999)}_#{$PROCESS_ID}.#{@format.to_s}.log"
-        fail "log file already exists: #{tmp_log_path}" if File.exist? tmp_log_path
+        fail_or_warn "log file already exists: #{tmp_log_path}" if File.exist? tmp_log_path
       end
 
       media_info = scan_media(path)
@@ -1088,6 +1088,14 @@ HERE
       end
 
       Kernel.warn "\nElapsed time: #{seconds_to_time(Time.now.tv_sec - seconds)}\n\n"
+    end
+
+    def fail_or_warn(message)
+      if @dry_run
+        Kernel.warn "#{$PROGRAM_NAME}: #{message}"
+      else
+        fail message
+      end
     end
 
     def scan_media(path)
