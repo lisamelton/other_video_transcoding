@@ -2,6 +2,15 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.3.1](https://github.com/donmelton/other_video_transcoding/releases/tag/0.3.1)
+
+Tuesday, May 26, 2020
+
+* Modify the `--preview-crop` option in `other-transcode` to show commands compatible with newer versions of `mpv`.
+* No longer force a NTSC film frame rate for interlaced inputs in PAL MPEG-2 format.
+* When using the `--dry-run` option in `other-transcode`, issue a warning instead of failing if the output or log files already exist.
+* Add a link to another Docker container for Linux in the "README" document. Thanks, @ttyS0!
+
 ## [0.3.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.3.0)
 
 Thursday, February 27, 2020
