@@ -17,10 +17,10 @@ module Transcoding
 
   class Command
     def about
-      <<HERE
+      <<-HERE
 other-transcode 0.3.1
 Copyright (c) 2019-2020 Don Melton
-HERE
+      HERE
     end
 
     def usage1
