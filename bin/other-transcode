@@ -24,7 +24,7 @@ HERE
     end
 
     def usage1
-      <<HERE
+      <<-HERE
 Transcode Blu-ray Disc or DVD rip into a smaller, more portable format
 while remaining high enough quality to be mistaken for the original.
 
@@ -34,55 +34,55 @@ Creates Matroska `.mkv` format file in current working directory.
 
 Automatically selects a platform-specific hardware video encoder.
 
-HERE
+      HERE
     end
 
     def usage2
-      <<HERE
+      <<-HERE
 Input options:
     --position TIME, --duration TIME
                     start transcoding at position and/or limit to duration
                       in seconds[.milliseconds] or [HH:]MM:SS[.m...] format
 
-HERE
+      HERE
     end
 
     def usage3
-      <<HERE
+      <<-HERE
 Output options:
     --debug         increase diagnostic information
     --scan          print media information and exit
     --preview-crop  show commands to preview detected video crop and exit
-HERE
+      HERE
     end
 
     def usage4
-      <<HERE
+      <<-HERE
     --print-crop    print only detected video crop geometry and exit
     --mp4           output MP4 instead of Matroska `.mkv` format
     --copy-track-names
                     copy all input audio track names to output
-HERE
+      HERE
     end
 
     def usage5
-      <<HERE
+      <<-HERE
     --max-muxing-queue-size SIZE
                     set maximum number of packets to buffer when muxing
-HERE
+      HERE
     end
 
     def usage6
-      <<HERE
+      <<-HERE
 -n, --dry-run       don't transcode, just show `ffmpeg` command and exit
 
 Video options:
     --hevc          use HEVC version of platform-specific video encoder
-HERE
+      HERE
     end
 
     def usage7
-      <<HERE
+      <<-HERE
     --vt            use Apple Video Toolbox encoder
     --nvenc         use Nvidia video encoder
     --qsv           use Intel Quick Sync video encoder
@@ -101,11 +101,11 @@ HERE
     --cuvid         use Nvidia video decoder
                       for H.264, VC-1, MPEG-2 and other formats
                       (ignores scope set by `--decode`)
-HERE
+      HERE
     end
 
     def usage8
-      <<HERE
+      <<-HERE
     --target [2160p=|1080p=|720p=|480p=]BITRATE
                     set video bitrate target (default: based on input)
                       or target for specific input resolution
@@ -113,11 +113,11 @@ HERE
                     set video crop geometry (default: none)
                       or automatically detect it
     --720p          fit video within 1280x720 pixel bounds
-HERE
+      HERE
     end
 
     def usage9
-      <<HERE
+      <<-HERE
     --1080p          "    "     "    1920x1080  "     "
     --deinterlace   reduce interlace artifacts without changing frame rate
                       (applied automatically for some inputs)
@@ -126,11 +126,11 @@ HERE
     --detelecine    drop duplicate frames to restore original frame rate
                       (disables any deinterlacing and forced frame rate)
     --no-filters    disable any automatic adjustments via filters
-HERE
+      HERE
     end
 
     def usage10
-      <<HERE
+      <<-HERE
     --rc-maxrate FACTOR, --rc-bufsize FACTOR
                     set ratecontrol maximum rate and/or buffer size
                       as multiple of video bitrate target
@@ -179,27 +179,27 @@ x264 software video encoder options:
     --x264-quick    increase encoding speed by 70-80%
                       with no easily perceptible loss in video quality
                       (avoids quality problems with some encoder presets)
-HERE
+      HERE
     end
 
     def usage11
-      <<HERE
+      <<-HERE
 
 Audio options:
     --main-audio TRACK[=WIDTH]
                     select main audio track by number (default: 1)
                       with optional width (default: surround)
-HERE
+      HERE
     end
 
     def usage12
-      <<HERE
+      <<-HERE
                         (use `original` to disable transcoding)
-HERE
+      HERE
     end
 
     def usage13
-      <<HERE
+      <<-HERE
     --add-audio TRACK|all|LANGUAGE|STRING[=WIDTH]
                     add single audio track by number
                       including main audio track
@@ -212,49 +212,49 @@ HERE
                       excluding main audio track
                       (comparison is case-insensitve)
                     with optional width (default: stereo)
-HERE
+      HERE
     end
 
     def usage14
-      <<HERE
+      <<-HERE
                       (use `original` to disable transcoding)
-HERE
+      HERE
     end
 
     def usage15
-      <<HERE
+      <<-HERE
     --surround-bitrate BITRATE
                     set surround audio bitrate (default: 640)
     --stereo-bitrate BITRATE
                     set stereo audio bitrate (default: 256)
-HERE
+      HERE
     end
 
     def usage16
-      <<HERE
+      <<-HERE
     --mono-bitrate BITRATE
                     set mono audio bitrate (default: 50% of stereo bitrate)
-HERE
+      HERE
     end
 
     def usage17
-      <<HERE
+      <<-HERE
     --eac3          use Enhanced AC-3 format for surround audio
-HERE
+      HERE
     end
 
     def usage18
-      <<HERE
+      <<-HERE
     --all-eac3       "     "      "     "     "  all audio
     --keep-ac3-stereo
                     copy stereo and mono audio in AC-3 format
                       even when orginal bitrate is above transcoding bitrate
     --pass-dts      enable passthrough of audio in DTS and DTS-ES formats
-HERE
+      HERE
     end
 
     def usage19
-      <<HERE
+      <<-HERE
 
 Subtitle options:
     --add-subtitle TRACK[=forced]|auto|all|LANGUAGE|STRING
@@ -279,7 +279,7 @@ Other options:
     --version       output version information and exit
 
 Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
-HERE
+      HERE
     end
 
     def initialize

@@ -15,14 +15,14 @@ module Transcoding
 
   class Command
     def about
-      <<HERE
+      <<-HERE
 ask-ffmpeg-log 0.3.1
 Copyright (c) 2019-2020 Don Melton
-HERE
+      HERE
     end
 
     def usage
-      <<HERE
+      <<-HERE
 Report temporal information from ffmpeg-generated `.log` files
 containing encoding statistics.
 
@@ -34,7 +34,7 @@ Options:
     --tabular       use tab character as field delimiter and suppress labels
 -h, --help          display this help and exit
     --version       output version information and exit
-HERE
+      HERE
     end
 
     def initialize
