@@ -1853,6 +1853,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         '-disposition:v', 'default'
       ]
 
+      encode_options += ['-tag:v', 'hvc1'] if @format == :mp4 and @hevc
+
       [decode_options, encode_options]
     end
 
