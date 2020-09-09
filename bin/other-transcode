@@ -2127,7 +2127,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
         options += [
           '-map', "0:#{subtitle['index']}",
-          "-c:s:#{index}", 'copy',
+          "-c:s:#{index}", ((@format == :mp4 and subtitle['codec_name'] == 'subrip') ? 'mov_text' : 'copy'),
           "-disposition:s:#{index}", (force ? 'default+forced' : '0')
         ]
 
