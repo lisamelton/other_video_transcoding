@@ -2,6 +2,14 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.3.2](https://github.com/donmelton/other_video_transcoding/releases/tag/0.3.2)
+
+Friday, September 11, 2020
+
+* Modify `other-transcode` to use a new `ffmpeg` Matroksa muxer option so the `-disposition` option is once again honored when using `ffmpeg` version 4.3 and later.
+* Change the codec ID from the default of `hev1` to `hvc1` for HEVC video in MP4 output from `other-transcode` to enable playback in QuickTime on macOS. Via [ #50](https://github.com/donmelton/other_video_transcoding/issues/50).
+* Convert added SRT format subtitles to MOV-compatible format in MP4 output from `other-transcode`. Via [ #55](https://github.com/donmelton/other_video_transcoding/issues/55).
+
 ## [0.3.1](https://github.com/donmelton/other_video_transcoding/releases/tag/0.3.1)
 
 Tuesday, May 26, 2020
