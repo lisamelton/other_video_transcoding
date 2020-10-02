@@ -98,7 +98,12 @@ Video options:
     --decode vc1|all|none
                     set scope of automatic hardware decoder acceleration
                       (default: vc1 for VC-1 format only)
-    --cuvid         use Nvidia video decoder
+    --cuda, --no-cuda
+                    enable or disable scoped use of Nvidia video decoder
+                      instead of generic hardware decoder
+                      (default: enabled when using Nvidia video encoder,
+                                disabled when using other encoders)
+    --cuvid         use other Nvidia video decoder
                       for H.264, VC-1, MPEG-2 and other formats
                       (ignores scope set by `--decode`)
       HERE
@@ -302,6 +307,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @ten_bit = nil
       @preset = nil
       @decode_scope = :vc1
+      @decode_method = nil
       @decoder_type = nil
       @target_2160p = nil
       @target_1080p = nil
@@ -499,6 +505,10 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         else
           fail UsageError, "invalid scope for automatic hardware decoder usage: #{$1}"
         end
+      end
+
+      opts.on '--[no-]cuda' do |arg|
+        @decode_method = arg ? 'cuda' : 'auto'
       end
 
       opts.on '--cuvid' do
@@ -919,6 +929,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @target_1080p ||= (@hevc and @ten_bit) ? 6000  : 8000
       @target_720p  ||= (@hevc and @ten_bit) ? 3000  : 4000
       @target_480p  ||= (@hevc and @ten_bit) ? 1500  : 2000
+
+      @decode_method ||= @encoder =~ /nvenc$/ ? 'cuda' : 'auto'
 
       if @stereo_encoder.nil?
         if encoders =~ /aac_at/ or encoders =~ /libfdk_aac/
@@ -1648,7 +1660,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
               '-hwaccel_output_format', 'vaapi'
             ]
           else
-            decode_options += ['-hwaccel', 'auto']
+            decode_options += ['-hwaccel', @decode_method]
           end
         end
       else
