@@ -659,7 +659,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         when 'qres', 'fullres'
           arg
         else
-          fail UsageError, "invalid multipass resolution: #{arg}"
+          fail UsageError, "invalid multipass resolution argument: #{arg}"
         end
       end
 
