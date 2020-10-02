@@ -103,9 +103,6 @@ Video options:
                       instead of generic hardware decoder
                       (default: enabled when using Nvidia video encoder,
                                 disabled when using other encoders)
-    --cuvid         use other Nvidia video decoder
-                      for H.264, VC-1, MPEG-2 and other formats
-                      (ignores scope set by `--decode`)
       HERE
     end
 
@@ -512,6 +509,9 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       opts.on '--cuvid' do
+        Kernel.warn '**********'
+        Kernel.warn 'Using deprecated option: --cuvid'
+        Kernel.warn '**********'
         @decoder_type = :cuvid
       end
 
