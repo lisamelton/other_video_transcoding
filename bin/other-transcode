@@ -1767,7 +1767,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         case @encoder
         when /nvenc$/
           case @preset
-          when 'fast', 'medium', 'slow'
+          when 'fast', 'medium', 'slow', /^p[1-7]$/
             valid = true
           end
         when /qsv$/
