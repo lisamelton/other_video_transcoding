@@ -140,11 +140,10 @@ Apple Video Toolbox encoder options:
     --vt-allow-sw   allow software encoding
 
 Nvidia video encoder options:
-    --nvenc-spatial-aq, --no-nvenc-spatial-aq
-                    enable or disable spatial AQ (default: enabled)
-    --nvenc-temporal-aq, --no-nvenc-temporal-aq
-                    enable or disable temporal AQ
-                      (default: enabled for H.264, disabled for HEVC)
+    --nvenc-spatial-aq
+                    enable spatial adaptive quantization (AQ)
+    --nvenc-temporal-aq
+                    enable temporal adaptive quantization (AQ)
     --nvenc-lookahead FRAMES
                     set number of frames to look ahead for ratecontrol
     --nvenc-refs FRAMES
@@ -317,8 +316,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @maxrate = nil
       @bufsize = nil
       @vt_allow_sw = false
-      @nvenc_spatial_aq = nil
-      @nvenc_temporal_aq = nil
+      @nvenc_spatial_aq = false
+      @nvenc_temporal_aq = false
       @nvenc_lookahead = nil
       @nvenc_refs = nil
       @nvenc_bframes = nil
@@ -624,11 +623,23 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       opts.on '--[no-]nvenc-spatial-aq' do |arg|
+        unless arg
+          Kernel.warn '**********'
+          Kernel.warn 'Using deprecated option: --no-nvenc-spatial-aq'
+          Kernel.warn '**********'
+        end
+
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
         @nvenc_spatial_aq = arg
       end
 
       opts.on '--[no-]nvenc-temporal-aq' do |arg|
+        unless arg
+          Kernel.warn '**********'
+          Kernel.warn 'Using deprecated option: --no-nvenc-temporal-aq'
+          Kernel.warn '**********'
+        end
+
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
         @nvenc_temporal_aq = arg
       end
@@ -1773,8 +1784,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       encode_options += ['-allow_sw:v', '1'] if @encoder =~ /videotoolbox$/ and @vt_allow_sw
 
       if @encoder =~ /nvenc$/
-        spatial_aq  = @nvenc_spatial_aq.nil?  ? false : @nvenc_spatial_aq
-        temporal_aq = @nvenc_temporal_aq.nil? ? false : @nvenc_temporal_aq
+        encode_options += ['-rc:v', @nvenc_rc_mode]
 
         if @hevc
           spatial_aq_option   = '-spatial_aq:v'
@@ -1784,17 +1794,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           temporal_aq_option  = '-temporal-aq:v'
         end
 
-        if @preset.nil?
-          encode_options += ['-rc:v', @nvenc_rc_mode]
-          spatial_aq = true if @nvenc_spatial_aq.nil?
-
-          unless @hevc
-            temporal_aq = true if @nvenc_temporal_aq.nil?
-          end
-        end
-
-        encode_options += [spatial_aq_option, '1']                    if spatial_aq
-        encode_options += [temporal_aq_option, '1']                   if temporal_aq
+        encode_options += [spatial_aq_option, '1']                    if @nvenc_spatial_aq
+        encode_options += [temporal_aq_option, '1']                   if @nvenc_temporal_aq
         encode_options += ['-rc-lookahead:v', @nvenc_lookahead.to_s]  unless @nvenc_lookahead.nil?
         encode_options += ['-refs:v', @nvenc_refs.to_s]               unless @nvenc_refs.nil?
         encode_options += ['-bf:v', @nvenc_bframes.to_s]              unless @nvenc_bframes.nil?
