@@ -1511,7 +1511,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       rate = @rate
 
       if @enable_filters
-        if video['avg_frame_rate'] == '30000/1001' or video['field_order'] != 'progressive'
+        if video['avg_frame_rate'] == '30000/1001' or video.fetch('field_order', 'progressive') != 'progressive'
           deinterlace = true
 
           if video['codec_name'] == 'mpeg2video' and video['avg_frame_rate'] != '25/1'
