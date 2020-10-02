@@ -146,6 +146,8 @@ Nvidia video encoder options:
                     enable temporal adaptive quantization (AQ)
     --nvenc-lookahead FRAMES
                     set number of frames to look ahead for ratecontrol
+    --nvenc-multipass qres|fullres
+                    set multipass encoding resolution
     --nvenc-refs FRAMES
                     set number of reference frames
     --nvenc-bframes FRAMES
@@ -319,6 +321,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @nvenc_spatial_aq = false
       @nvenc_temporal_aq = false
       @nvenc_lookahead = nil
+      @nvenc_multipass = nil
       @nvenc_refs = nil
       @nvenc_bframes = nil
       @nvenc_rc_mode = 'vbr'
@@ -647,6 +650,17 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       opts.on '--nvenc-lookahead ARG', Integer do |arg|
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
         @nvenc_lookahead = [[arg, 0].max, 32].min
+      end
+
+      opts.on '--nvenc-multipass ARG' do |arg|
+        @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
+
+        @nvenc_multipass = case arg
+        when 'qres', 'fullres'
+          arg
+        else
+          fail UsageError, "invalid multipass resolution: #{arg}"
+        end
       end
 
       opts.on '--nvenc-refs ARG', Integer do |arg|
@@ -1797,6 +1811,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         encode_options += [spatial_aq_option, '1']                    if @nvenc_spatial_aq
         encode_options += [temporal_aq_option, '1']                   if @nvenc_temporal_aq
         encode_options += ['-rc-lookahead:v', @nvenc_lookahead.to_s]  unless @nvenc_lookahead.nil?
+        encode_options += ['-multipass:v', @nvenc_multipass]          unless @nvenc_multipass.nil?
         encode_options += ['-refs:v', @nvenc_refs.to_s]               unless @nvenc_refs.nil?
         encode_options += ['-bf:v', @nvenc_bframes.to_s]              unless @nvenc_bframes.nil?
       end
