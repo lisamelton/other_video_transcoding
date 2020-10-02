@@ -151,6 +151,8 @@ Nvidia video encoder options:
                     set number of reference frames
     --nvenc-bframes FRAMES
                     set maximum number of B-frames
+    --nvenc-rc-mode vbr|vbr_hq
+                    set ratecontrol mode (default: vbr)
 
 Intel Quick Sync video encoder options:
     --qsv-refs FRAMES
@@ -320,6 +322,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @nvenc_lookahead = nil
       @nvenc_refs = nil
       @nvenc_bframes = nil
+      @nvenc_rc_mode = 'vbr'
       @qsv_refs = nil
       @qsv_bframes = nil
       @amf_quality = nil
@@ -645,6 +648,17 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @nvenc_bframes = [[arg, 0].max, 4].min
       end
 
+      opts.on '--nvenc-rc-mode ARG' do |arg|
+        @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
+
+        @nvenc_rc_mode = case arg
+        when 'vbr', 'vbr_hq'
+          arg
+        else
+          fail UsageError, "invalid rate control argument: #{arg}"
+        end
+      end
+
       opts.on '--qsv-refs ARG', Integer do |arg|
         @encoder = @hevc ? 'hevc_qsv' : 'h264_qsv'
         @qsv_refs = [arg, 0].max
@@ -948,7 +962,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         ] + (encoder =~ /vaapi$/ ? ['-filter:v', 'format=nv12,hwupload'] : []) + [
           '-c:v', encoder,
           '-b:v', '1000k'
-        ] + (encoder =~ /nvenc$/ ? ['-rc:v', 'vbr_hq', '-spatial-aq:v', '1'] : []) +
+        ] + (encoder =~ /nvenc$/ ? ['-rc:v', @nvenc_rc_mode, '-spatial-aq:v', '1'] : []) +
             (encoder == 'h264_nvenc' ? ['-temporal-aq:v', '1'] : []) +
             (encoder == 'h264_qsv' ? ['-look_ahead:v', '1'] : []) +
             (encoder == 'hevc_qsv' ? ['-load_plugin:v', 'hevc_hw'] : []) +
@@ -1771,7 +1785,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         end
 
         if @preset.nil?
-          encode_options += ['-rc:v', 'vbr_hq']
+          encode_options += ['-rc:v', @nvenc_rc_mode]
           spatial_aq = true if @nvenc_spatial_aq.nil?
 
           unless @hevc
