@@ -184,6 +184,12 @@ x264 software video encoder options:
     --x264-quick    increase encoding speed by 70-80%
                       with no easily perceptible loss in video quality
                       (avoids quality problems with some encoder presets)
+    --x264-params KEY=VALUE[:KEY=VALUE]...
+                    override x264 configuration (disables other x264 options)
+
+x265 software video encoder options:
+    --x265-params KEY=VALUE[:KEY=VALUE]...
+                    override x265 configuration
       HERE
     end
 
@@ -339,6 +345,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @x264_avbr = false
       @x264_mbtree = false
       @x264_quick = false
+      @x264_params = nil
+      @x265_params = nil
       @audio_selections = [{
         :track => 1,
         :language => nil,
@@ -745,6 +753,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @hevc = false
         @x264_avbr = true
         @x264_mbtree = false
+        @x264_params = nil
       end
 
       opts.on '--x264-mbtree' do
@@ -752,13 +761,38 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @hevc = false
         @x264_mbtree = true
         @x264_avbr = false
+        @x264_params = nil
       end
 
       opts.on '--x264-quick' do
         @encoder = 'libx264'
         @hevc = false
         @x264_quick = true
+        @x264_params = nil
         @preset = nil
+      end
+
+      opts.on '--x264-params ARG' do |arg|
+        arg.split ':' do |param|
+          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,]+$/
+        end
+
+        @encoder = 'libx264'
+        @hevc = false
+        @x264_params = arg
+        @x264_avbr = false
+        @x264_mbtree = true
+        @x264_quick = false
+      end
+
+      opts.on '--x265-params ARG' do |arg|
+        arg.split ':' do |param|
+          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,]+$/
+        end
+
+        @encoder = 'libx265'
+        @hevc = true
+        @x265_params = arg
       end
 
       opts.on '--main-audio ARG' do |arg|
@@ -1876,6 +1910,12 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
           encode_options += ['-refs:v', max_refs.to_s] if refs > max_refs
         end
+
+        encode_options += ['-x264-params:v', @x264_params] unless @x264_params.nil?
+      end
+
+      if @encoder == 'libx265'
+        encode_options += ['-x265-params:v', @x265_params] unless @x265_params.nil?
       end
 
       unless @ten_bit
