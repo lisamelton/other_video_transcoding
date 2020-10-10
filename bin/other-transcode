@@ -142,8 +142,9 @@ Apple Video Toolbox encoder options:
     --vt-allow-sw   allow software encoding
 
 Nvidia video encoder options:
-    --nvenc-spatial-aq
-                    enable spatial adaptive quantization (AQ)
+    --nvenc-spatial-aq, --no-nvenc-spatial-aq
+                    enable or disable spatial adaptive quantization (AQ)
+                      (default: enabled for 8-bit, disabled for 10-bit)
     --nvenc-temporal-aq
                     enable temporal adaptive quantization (AQ)
     --nvenc-lookahead FRAMES
@@ -327,7 +328,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @maxrate = nil
       @bufsize = nil
       @vt_allow_sw = false
-      @nvenc_spatial_aq = false
+      @nvenc_spatial_aq = nil
       @nvenc_temporal_aq = false
       @nvenc_lookahead = nil
       @nvenc_multipass = nil
@@ -644,12 +645,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       opts.on '--[no-]nvenc-spatial-aq' do |arg|
-        unless arg
-          Kernel.warn '**********'
-          Kernel.warn 'Using deprecated option: --no-nvenc-spatial-aq'
-          Kernel.warn '**********'
-        end
-
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
         @nvenc_spatial_aq = arg
       end
@@ -964,6 +959,10 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @target_720p  ||= (@hevc and @ten_bit) ? 3000  : 4000
       @target_480p  ||= (@hevc and @ten_bit) ? 1500  : 2000
 
+      if @nvenc_spatial_aq.nil?
+        @nvenc_spatial_aq = @preset == 'none' ? false : !@ten_bit
+      end
+
       @decode_method ||= @encoder =~ /nvenc$/ ? 'cuda' : 'auto'
 
       if @stereo_encoder.nil?
@@ -1034,7 +1033,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           '-c:v', encoder,
           '-b:v', '1000k'
         ] + (encoder =~ /nvenc$/ ? ['-rc:v', @nvenc_rc_mode, '-spatial-aq:v', '1'] : []) +
-            (encoder == 'h264_nvenc' ? ['-temporal-aq:v', '1'] : []) +
             (encoder == 'h264_qsv' ? ['-look_ahead:v', '1'] : []) +
             (encoder == 'hevc_qsv' ? ['-load_plugin:v', 'hevc_hw'] : []) +
             (encoder =~ /amf$/ ? ['-rc:v', 'vbr_latency'] : []) + [
