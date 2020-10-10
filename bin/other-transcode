@@ -1843,17 +1843,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       if @encoder =~ /nvenc$/
         encode_options += ['-rc:v', @nvenc_rc_mode]
-
-        if @hevc
-          spatial_aq_option   = '-spatial_aq:v'
-          temporal_aq_option  = '-temporal_aq:v'
-        else
-          spatial_aq_option   = '-spatial-aq:v'
-          temporal_aq_option  = '-temporal-aq:v'
-        end
-
-        encode_options += [spatial_aq_option, '1']                    if @nvenc_spatial_aq
-        encode_options += [temporal_aq_option, '1']                   if @nvenc_temporal_aq
+        encode_options += ['-spatial-aq:v', '1']                      if @nvenc_spatial_aq
+        encode_options += ['-temporal-aq:v', '1']                     if @nvenc_temporal_aq
         encode_options += ['-rc-lookahead:v', @nvenc_lookahead.to_s]  unless @nvenc_lookahead.nil?
         encode_options += ['-multipass:v', @nvenc_multipass]          unless @nvenc_multipass.nil?
         encode_options += ['-refs:v', @nvenc_refs.to_s]               unless @nvenc_refs.nil?
