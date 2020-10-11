@@ -93,8 +93,7 @@ Video options:
     --10-bit, --no-10-bit
                     use 10-bit pixel format (default: not used for H.264,
                       used for HEVC with Nvidia, Intel and x265 encoders)
-    --preset NAME|none
-                    apply video encoder preset or disable default settings
+    --preset NAME   apply video encoder preset
     --decode vc1|all|none
                     set scope of automatic hardware decoder acceleration
                       (default: vc1 for VC-1 format only)
@@ -499,7 +498,15 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       opts.on '--preset ARG' do |arg|
-        @preset = arg
+        if arg == 'none'
+          Kernel.warn '**********'
+          Kernel.warn 'Using deprecated `--preset` argument: none'
+          Kernel.warn '**********'
+          @preset = nil
+        else
+          @preset = arg
+        end
+
         @encoder = nil if @encoder == 'copy'
       end
 
@@ -1791,9 +1798,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         end
       end
 
-      if @preset.nil? or @preset == 'none'
-        preset = nil
-      else
+      unless @preset.nil?
         valid = false
 
         case @encoder
@@ -1816,8 +1821,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         end
 
         fail "invalid preset for encoder: #{@preset}" unless valid
-
-        preset = @preset
       end
 
       Kernel.warn 'Stream mapping:'
@@ -1825,7 +1828,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       unless @encoder == 'copy'
         text += " / #{bitrate} Kbps"
-        text += " / #{preset}" unless preset.nil?
+        text += " / #{@preset}" unless @preset.nil?
       end
 
       unless burn_subtitle.nil?
@@ -1838,7 +1841,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       encode_options += ['-b:v', "#{bitrate}k"] unless @encoder == 'copy'
       encode_options += ['-maxrate:v', "#{maxrate}k"] if maxrate > 0
       encode_options += ['-bufsize:v', "#{bufsize}k"] if bufsize > 0
-      encode_options += ['-preset:v', preset] unless preset.nil?
+      encode_options += ['-preset:v', @preset] unless @preset.nil?
       encode_options += ['-allow_sw:v', '1'] if @encoder =~ /videotoolbox$/ and @vt_allow_sw
 
       if @encoder =~ /nvenc$/
