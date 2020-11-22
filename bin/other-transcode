@@ -642,26 +642,14 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @vt_allow_sw = true
       end
 
-      opts.on '--[no-]nvenc-spatial-aq' do |arg|
-        unless arg
-          Kernel.warn '**********'
-          Kernel.warn 'Using deprecated option: --no-nvenc-spatial-aq'
-          Kernel.warn '**********'
-        end
-
+      opts.on '--nvenc-spatial-aq' do
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
-        @nvenc_spatial_aq = arg
+        @nvenc_spatial_aq = true
       end
 
-      opts.on '--[no-]nvenc-temporal-aq' do |arg|
-        unless arg
-          Kernel.warn '**********'
-          Kernel.warn 'Using deprecated option: --no-nvenc-temporal-aq'
-          Kernel.warn '**********'
-        end
-
+      opts.on '--nvenc-temporal-aq' do
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
-        @nvenc_temporal_aq = arg
+        @nvenc_temporal_aq = true
       end
 
       opts.on '--nvenc-lookahead ARG', Integer do |arg|
