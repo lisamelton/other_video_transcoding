@@ -102,6 +102,10 @@ Video options:
                       instead of generic hardware decoder
                       (default: enabled when using Nvidia video encoder,
                                 disabled when using other encoders)
+    --qsv-decoder   enable scoped use of Intel Quick Sync video decoder
+                      instead of generic hardware decoder
+    --qsv-device DEVICE
+                    enable scoped use of QSV decoder for specific device
       HERE
     end
 
@@ -310,6 +314,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @preset = nil
       @decode_scope = :vc1
       @decode_method = nil
+      @qsv_device = nil
       @target_2160p = nil
       @target_1080p = nil
       @target_720p  = nil
@@ -512,6 +517,15 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--[no-]cuda' do |arg|
         @decode_method = arg ? 'cuda' : 'auto'
+      end
+
+      opts.on '--qsv-decoder' do
+        @decode_method = 'qsv'
+      end
+
+      opts.on '--qsv-device ARG' do |arg|
+        @qsv_device = arg
+        @decode_method = 'qsv'
       end
 
       opts.on '--target ARG' do |arg|
@@ -1619,7 +1633,43 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
             '-hwaccel_output_format', 'vaapi'
           ]
         else
-          decode_options += ['-hwaccel', @decode_method]
+          if @decode_method == 'qsv' and @encoder != 'h264_qsv'
+            decode_method = 'auto'
+          else
+            decode_method = @decode_method
+          end
+
+          decode_options += ['-hwaccel', decode_method]
+
+          if  decode_method == 'qsv' and
+              overlay_filter.nil? and
+              frame_rate_filter.nil? and
+              crop_filter.nil? and
+              scale_filter.nil?
+            qsv_decoder = case video['codec_name']
+            when 'av1'
+              'av1_qsv'
+            when 'h264'
+              'h264_qsv'
+            when 'hevc'
+              'hevc_qsv'
+            when 'mjpeg'
+              'mjpeg_qsv'
+            when 'mpeg2video'
+              'mpeg2_qsv'
+            when 'vc1'
+              'vc1_qsv'
+            when 'vp8'
+              'vp8_qsv'
+            when 'vp9'
+              'vp9_qsv'
+            else
+              nil
+            end
+
+            decode_options += ['-qsv_device', @qsv_device] unless @qsv_device.nil?
+            decode_options += ['-c:v', qsv_decoder] unless qsv_decoder.nil?
+          end
         end
       end
 
