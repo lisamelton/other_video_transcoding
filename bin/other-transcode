@@ -161,9 +161,6 @@ Nvidia video encoder options:
                     set ratecontrol mode (default: vbr)
 
 Intel Quick Sync video encoder options:
-    --qsv-lookahead FRAMES
-                    set number of frames to look ahead for ratecontrol
-    --qsv-rdo       enable rate distortion optimization
     --qsv-refs FRAMES
                     set number of reference frames
     --qsv-bframes FRAMES
@@ -340,8 +337,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @nvenc_refs = nil
       @nvenc_bframes = nil
       @nvenc_rc_mode = 'vbr'
-      @qsv_lookahead = nil
-      @qsv_rdo = false
       @qsv_refs = nil
       @qsv_bframes = nil
       @amf_quality = nil
@@ -698,17 +693,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         else
           fail UsageError, "invalid rate control argument: #{arg}"
         end
-      end
-
-      opts.on '--qsv-lookahead ARG', Integer do |arg|
-        @encoder = 'h264_qsv'
-        @hevc = false
-        @qsv_lookahead = [[arg, 0].max, 100].min
-      end
-
-      opts.on '--qsv-rdo' do
-        @encoder = @hevc ? 'hevc_qsv' : 'h264_qsv'
-        @qsv_rdo = true
       end
 
       opts.on '--qsv-refs ARG', Integer do |arg|
@@ -1834,16 +1818,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       if @encoder =~ /qsv$/
-        if @encoder == 'h264_qsv'
-          encode_options += ['-look_ahead:v', '1']
-
-          unless @qsv_lookahead.nil?
-            decode_options += ['-extra_hw_frames', @qsv_lookahead.to_s] if @qsv_lookahead > 40 and decode_method == 'qsv'
-            encode_options += ['-look_ahead_depth:v', @qsv_lookahead.to_s]
-          end
-        end
-
-        encode_options += ['-rdo:v', '1']               if @qsv_rdo
+        encode_options += ['-look_ahead:v', '1']        if @encoder == 'h264_qsv'
         encode_options += ['-refs:v', @qsv_refs.to_s]   unless @qsv_refs.nil?
         encode_options += ['-bf:v', @qsv_bframes.to_s]  unless @qsv_bframes.nil?
         encode_options += ['-load_plugin:v', 'hevc_hw'] if @encoder == 'hevc_qsv'
