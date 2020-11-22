@@ -497,15 +497,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       opts.on '--preset ARG' do |arg|
-        if arg == 'none'
-          Kernel.warn '**********'
-          Kernel.warn 'Using deprecated `--preset` argument: none'
-          Kernel.warn '**********'
-          @preset = nil
-        else
-          @preset = arg
-        end
-
+        @preset = arg
         @encoder = nil if @encoder == 'copy'
       end
 
