@@ -310,7 +310,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @preset = nil
       @decode_scope = :vc1
       @decode_method = nil
-      @decoder_type = nil
       @target_2160p = nil
       @target_1080p = nil
       @target_720p  = nil
@@ -523,13 +522,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @decode_method = arg ? 'cuda' : 'auto'
       end
 
-      opts.on '--cuvid' do
-        Kernel.warn '**********'
-        Kernel.warn 'Using deprecated option: --cuvid'
-        Kernel.warn '**********'
-        @decoder_type = :cuvid
-      end
-
       opts.on '--target ARG' do |arg|
         if arg =~ /^([0-9]+p)=([1-9][0-9]*)$/
           bitrate = [$2.to_i, 1].max
@@ -584,7 +576,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @deinterlace = true
         @detelecine = false
         @enable_filters = false
-        @encoder = nil if @encoder == 'copy' and @decoder_type != :cuvid
+        @encoder = nil if @encoder == 'copy'
       end
 
       opts.on '--rate ARG' do |arg|
@@ -1563,38 +1555,10 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
     end
 
     def get_video_options(media_info, video, burn_subtitle, crop)
-      if @decoder_type == :cuvid
-        cuvid_decoder = case video['codec_name']
-        when 'mpeg1video'
-          'mpeg1_cuvid'
-        when 'mpeg2video'
-          'mpeg2_cuvid'
-        when 'mjpeg'
-          'mjpeg_cuvid'
-        when 'mpeg4'
-          'mpeg4_cuvid'
-        when 'h264'
-          'h264_cuvid'
-        when 'vc1'
-          'vc1_cuvid'
-        when 'vp8'
-          'vp8_cuvid'
-        when 'vp9'
-          'vp9_cuvid'
-        when 'hevc'
-          'hevc_cuvid'
-        end
-      else
-        cuvid_decoder = nil
-      end
-
-      cuvid_options = []
-
       if burn_subtitle.nil?
         overlay_filter = nil
       else
         overlay_filter = "[0:#{burn_subtitle['index']}]overlay"
-        cuvid_decoder = nil
       end
 
       deinterlace = @deinterlace
@@ -1613,11 +1577,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       frame_rate_filter = nil
 
       if deinterlace
-        if cuvid_decoder.nil?
-          frame_rate_filter = 'yadif=deint=interlaced' unless @encoder == 'copy'
-        else
-          cuvid_options += ['-deint:v', 'adaptive']
-        end
+        frame_rate_filter = 'yadif=deint=interlaced' unless @encoder == 'copy'
       end
 
       unless rate.nil?
@@ -1628,7 +1588,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       if @detelecine
         frame_rate_filter = 'fieldmatch=order=tff:combmatch=none,decimate'
-        cuvid_decoder = nil
       end
 
       width   = video['width'].to_i
@@ -1643,21 +1602,9 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       if crop.nil? or (crop == {:width => width, :height => height, :x => 0, :y => 0})
         crop_filter = nil
       else
-        media_width   = width
-        media_height  = height
-        width         = crop[:width]
-        height        = crop[:height]
-
-        if cuvid_decoder.nil?
-          crop_filter = "crop=#{width}:#{height}:#{crop[:x]}:#{crop[:y]}"
-        else
-          crop_filter = nil
-          top     = crop[:y]
-          bottom  = media_height - (top + height)
-          left    = crop[:x]
-          right   = media_width - (left + width)
-          cuvid_options += ['-crop:v', "#{top}x#{bottom}x#{left}x#{right}"]
-        end
+        width       = crop[:width]
+        height      = crop[:height]
+        crop_filter = "crop=#{width}:#{height}:#{crop[:x]}:#{crop[:y]}"
       end
 
       if @hevc
@@ -1672,14 +1619,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         scale = [(max_width.to_f / width), (max_height.to_f / height)].min
         width   = ((width   * scale).ceil / 2) * 2
         height  = ((height  * scale).ceil / 2) * 2
-
-        if cuvid_decoder.nil?
-          scale_filter = "scale=#{width}:#{height}"
-          scale_filter += ':flags=bicubic' unless overlay_filter.nil?
-        else
-          scale_filter = nil
-          cuvid_options += ['-resize:v', "#{width}x#{height}"]
-        end
+        scale_filter = "scale=#{width}:#{height}"
+        scale_filter += ':flags=bicubic' unless overlay_filter.nil?
       else
         scale_filter = nil
       end
@@ -1690,24 +1631,16 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         decode_options = []
       end
 
-      if cuvid_decoder.nil?
-        if (@decode_scope == :vc1 and video['codec_name'] == 'vc1') or @decode_scope == :all
-          if @encoder =~ /vaapi$/
-            decode_options = [
-              '-hwaccel', 'vaapi',
-              '-hwaccel_device', '/dev/dri/renderD128',
-              '-hwaccel_output_format', 'vaapi'
-            ]
-          else
-            decode_options += ['-hwaccel', @decode_method]
-          end
+      if (@decode_scope == :vc1 and video['codec_name'] == 'vc1') or @decode_scope == :all
+        if @encoder =~ /vaapi$/
+          decode_options = [
+            '-hwaccel', 'vaapi',
+            '-hwaccel_device', '/dev/dri/renderD128',
+            '-hwaccel_output_format', 'vaapi'
+          ]
+        else
+          decode_options += ['-hwaccel', @decode_method]
         end
-      else
-        Kernel.warn "video decoder = #{cuvid_decoder}"
-
-        decode_options += [
-          '-c:v', cuvid_decoder
-        ] + cuvid_options
       end
 
       if @encoder =~ /vaapi$/ and not decode_options.include?('-hwaccel')
