@@ -1836,7 +1836,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       if @encoder =~ /qsv$/
         if @encoder == 'h264_qsv'
           encode_options += ['-look_ahead:v', '1']
-          encode_options += ['-look_ahead_depth:v', @qsv_lookahead.to_s] unless @qsv_lookahead.nil?
+
+          unless @qsv_lookahead.nil?
+            decode_options += ['-extra_hw_frames', @qsv_lookahead.to_s] if @qsv_lookahead > 40 and decode_method == 'qsv'
+            encode_options += ['-look_ahead_depth:v', @qsv_lookahead.to_s]
+          end
         end
 
         encode_options += ['-rdo:v', '1']               if @qsv_rdo
