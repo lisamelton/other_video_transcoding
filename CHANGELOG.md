@@ -2,6 +2,13 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.5.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.5.0)
+
+Tuesday, November 24, 2020
+
+* Add `--qsv-decoder` and `--qsv-device` options to `other-transcode`, both of which enable the scoped use of the Intel Quick Sync Video (QSV) decoder instead of the generic hardware decoder. These options can significantly speed operation of the QSV encoder, invoked via `--qsv`. It's recommended that `--decode all` be included when using these options to decode all video input formats. The `--qsv-device` option allows selection of specific hardware by number or path depending on platform. Please note that deinterlacing, cropping, scaling or using other filters will disable QSV's format-specific decoders.
+* Remove all deprecated options and arguments from `other-transcode`.
+
 ## [0.4.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.4.0)
 
 Sunday, November 1, 2020
