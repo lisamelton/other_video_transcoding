@@ -660,7 +660,12 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--nvenc-lookahead ARG', Integer do |arg|
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
-        @nvenc_lookahead = [[arg, 0].max, 32].min
+
+        if arg > 0
+          @nvenc_lookahead = [arg, 32].min
+        else
+          @nvenc_lookahead = nil
+        end
       end
 
       opts.on '--nvenc-multipass ARG' do |arg|
