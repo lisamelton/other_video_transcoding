@@ -1760,9 +1760,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         end
 
         if @bufsize.nil?
-          bufsize = maxrate if @encoder =~ /^libx26[45]$/
+          bufsize = maxrate if @encoder =~ /(nvenc|libx26[45])$/
         else
-          bufsize = [[(bitrate * @bufsize).to_i, bitrate].max, bitrate * 4].min
+          unless @bufsize == 0 and @encoder =~ /nvenc$/
+            bufsize = [[(bitrate * @bufsize).to_i, bitrate].max, bitrate * 4].min
+          end
         end
       end
 
