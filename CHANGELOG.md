@@ -2,6 +2,16 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.6.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.6.0)
+
+Tuesday, December 22, 2020
+
+* Lower the default target bitrates for 8-bit HEVC video in `other-transcode` to match the defaults for 10-bit HEVC video. This means, for example, the default target for HEVC at a 1080p resolution will be 6000 Kbps no matter the output bit depth.
+* Modify `other-transcode` to set the video buffer size equal to the maximum video bitrate when using an Nvidia encoder, essentially adding `--rc-bufsize 3` to the command line. Previously the buffer size was never explicitly set so `ffmpeg` would use a default value of twice the target bitrate. Since the maximum bitrate is normally three times the target bitrate this meant the buffer size was actually smaller than the maximum. While this didn't cause any known problems, Nvidia recommends a larger buffer size to improve quality. However, using `--rc-bufsize 0` will restore the old behavior and the default value from `ffmpeg`.
+* Ignore the `--nvenc-lookahead` option in `other-transcode` when the argument is `0` since such a value won't change the behavior of an Nvidia encoder anyway.
+* Add a `--limit-ac3-surround` option to `other-transcode` which prevents surround audio in AC-3 or Dolby Digital Plus (Enhanced AC-3) format from being copied instead of transcoded when the orginal bitrate is above the transcoding bitrate. This allows setting a lower target with the `--surround-bitrate` option in order to force higher-bitrate tracks to be transcoded instead of copied. 
+* Reduce the minimum bitrates for Dolby Digital Plus audio in `other-transcode` from 256, 128 and 64 Kbps for surround, stereo and mono layouts to 192, 96 and 48 Kbps. The default bitrates for Dolby Digital Plus audio remain the same and this change does not affect audio output in AC-3 or AAC formats.
+
 ## [0.5.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.5.0)
 
 Tuesday, November 24, 2020
