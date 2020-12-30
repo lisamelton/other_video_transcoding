@@ -966,10 +966,10 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       @ten_bit = (@hevc and @encoder =~ /(nvenc|qsv|x265)$/ ? true : false) if @ten_bit.nil?
-      @target_2160p ||= @hevc ? 12000 : 16000
-      @target_1080p ||= @hevc ? 6000  : 8000
-      @target_720p  ||= @hevc ? 3000  : 4000
-      @target_480p  ||= @hevc ? 1500  : 2000
+      @target_2160p ||= @hevc ? 8000 : 12000
+      @target_1080p ||= @hevc ? 4000 :  6000
+      @target_720p  ||= @hevc ? 2000 :  3000
+      @target_480p  ||= @hevc ? 1000 :  1500
       @decode_method ||= @encoder =~ /nvenc$/ ? 'cuda' : 'auto'
 
       if @stereo_encoder.nil?
