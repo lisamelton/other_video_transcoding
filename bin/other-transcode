@@ -260,6 +260,7 @@ Audio options:
 
     def usage18
       <<-HERE
+    --aac-stereo    use AAC format for stereo audio
     --limit-ac3-surround
                     don't copy surround audio in AC-3 format
                       when orginal bitrate is above transcoding bitrate
@@ -857,6 +858,10 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         Kernel.warn '**********'
         @surround_encoder = 'eac3'
         @stereo_encoder   = 'eac3'
+      end
+
+      opts.on '--aac-stereo' do
+        @stereo_encoder = nil
       end
 
       opts.on '--limit-ac3-surround' do
