@@ -359,8 +359,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         :title => nil,
         :width => :surround
       }]
-      @surround_bitrate = 640
-      @stereo_bitrate = 256
+      @surround_bitrate = nil
+      @stereo_bitrate = nil
       @mono_bitrate = nil
       @surround_encoder = 'ac3'
       @stereo_encoder = nil
@@ -917,14 +917,31 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
     def configure(path)
       @audio_selections.uniq!
       @subtitle_selections.uniq!
-      min_bitrate = @surround_encoder == 'eac3' ? 192 : 256
-      @surround_bitrate = [[@surround_bitrate, min_bitrate].max, (@surround_encoder == 'ac3' ? 640 : 768)].min
-      @stereo_bitrate = [[@stereo_bitrate, min_bitrate / 2].max, (@stereo_encoder == 'eac3' ? 768 : 320)].min
+
+      if @surround_encoder == 'eac3'
+        @surround_bitrate ||= 384
+        @surround_bitrate = [[@surround_bitrate, 192].max, 768].min
+      else
+        @surround_bitrate ||= 640
+        @surround_bitrate = [[@surround_bitrate, 256].max, 640].min
+      end
+
+      if @stereo_encoder == 'eac3'
+        @stereo_bitrate ||= 192
+        @stereo_bitrate = [[@stereo_bitrate, 96].max, 768].min
+      else
+        @stereo_bitrate ||= 256
+        @stereo_bitrate = [[@stereo_bitrate, 128].max, 320].min
+      end
 
       if @mono_bitrate.nil?
         @mono_bitrate = @stereo_bitrate / 2
       else
-        @mono_bitrate = [[@mono_bitrate, min_bitrate / 4].max, (@stereo_encoder == 'eac3' ? 768 : 256)].min
+        if @stereo_encoder == 'eac3'
+          @mono_bitrate = [[@mono_bitrate, 48].max, 768].min
+        else
+          @mono_bitrate = [[@mono_bitrate, 64].max, 256].min
+        end
       end
 
       [
