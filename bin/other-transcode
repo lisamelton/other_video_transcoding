@@ -253,13 +253,13 @@ Audio options:
 
     def usage17
       <<-HERE
-    --eac3          use Enhanced AC-3 format for surround audio
+    --eac3          use Dolby Digital Plus (E-AC-3) format for all audio
+                      (default bitrates: 384 for surround, 192 for stereo)
       HERE
     end
 
     def usage18
       <<-HERE
-    --all-eac3       "     "      "     "     "  all audio
     --limit-ac3-surround
                     don't copy surround audio in AC-3 format
                       when orginal bitrate is above transcoding bitrate
@@ -848,9 +848,13 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--eac3' do
         @surround_encoder = 'eac3'
+        @stereo_encoder   = 'eac3'
       end
 
       opts.on '--all-eac3' do
+        Kernel.warn '**********'
+        Kernel.warn 'Using deprecated option: --all-eac3'
+        Kernel.warn '**********'
         @surround_encoder = 'eac3'
         @stereo_encoder   = 'eac3'
       end
