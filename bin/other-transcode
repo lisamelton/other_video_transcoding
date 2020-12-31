@@ -91,8 +91,9 @@ Video options:
     --x264          use x264 software video encoder
     --x265          use x265    "       "      "
     --10-bit, --no-10-bit
-                    use 10-bit pixel format (default: not used for H.264,
+                    use 10-bit color depth (default: not used for H.264,
                       used for HEVC with Nvidia, Intel and x265 encoders)
+    --8-bit-vc1     use 8-bit color depth for VC-1 format only
     --preset NAME   apply video encoder preset
     --decode vc1|all|none
                     set scope of automatic hardware decoder acceleration
@@ -315,6 +316,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @hevc = false
       @encoder = nil
       @ten_bit = nil
+      @eight_bit_vc1 = false
       @preset = nil
       @decode_scope = :vc1
       @decode_method = nil
@@ -503,6 +505,12 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--[no-]10-bit' do |arg|
         @ten_bit = arg
+        @eight_bit_vc1 = false
+        @encoder = nil if @encoder == 'copy'
+      end
+
+      opts.on '--8-bit-vc1' do
+        @eight_bit_vc1 = true
         @encoder = nil if @encoder == 'copy'
       end
 
@@ -1747,7 +1755,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         ]
       end
 
-      hdr = ((video.fetch('pix_fmt', 'yuv420p') == 'yuv420p10le') and @ten_bit)
+      ten_bit = (@ten_bit ? (@eight_bit_vc1 ? (video['codec_name'] != 'vc1') : true) : false)
+      hdr = ((video.fetch('pix_fmt', 'yuv420p') == 'yuv420p10le') and ten_bit)
 
       if hdr
         color_primaries = 'bt2020'
@@ -1842,7 +1851,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       Kernel.warn text
       encode_options += ['-c:v', @encoder]
-      encode_options += ['-pix_fmt:v', (@encoder =~ /(nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if @ten_bit
+      encode_options += ['-pix_fmt:v', (@encoder =~ /(nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if ten_bit
       encode_options += ['-b:v', "#{bitrate}k"] unless @encoder == 'copy'
       encode_options += ['-maxrate:v', "#{maxrate}k"] if maxrate > 0
       encode_options += ['-bufsize:v', "#{bufsize}k"] if bufsize > 0
@@ -1915,7 +1924,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         encode_options += ['-x265-params:v', @x265_params] unless @x265_params.nil?
       end
 
-      unless @ten_bit
+      unless ten_bit
         encode_options += ['-profile:v', 'high'] if @encoder =~ /^(h264_nvenc|h264_amf|libx264)$/
       end
 
