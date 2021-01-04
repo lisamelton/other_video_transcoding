@@ -2,6 +2,41 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.7.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.7.0)
+
+* Modify `other-transcode` to lower default target bitrates in order to significantly reduce the size of transcoded output at the risk of a slight reduction in perceived quality. Via [ #89](https://github.com/donmelton/other_video_transcoding/issues/89).
+
+H.264 video:
+
+Resolution | old | new
+--- | --- | ---
+1080p (Blu-ray video) | 8000 Kbps | 6000 Kbps
+720p | 4000 Kbps | 3000 Kbps
+480p (DVD video) | 2000 Kbps | 1500 Kbps
+
+HEVC video:
+
+Resolution | old | new
+--- | --- | ---
+1080p (Blu-ray video) | 6000 Kbps | 4000 Kbps
+720p | 3000 Kbps | 2000 Kbps
+480p (DVD video) | 1500 Kbps | 1000 Kbps
+
+Dolby Digital Plus (Enhanced AC-3) audio:
+
+Channels | old | new
+--- | --- | ---
+Surround | 640 Kbps | 384 Kbps
+Stereo | 256 Kbps | 192 Kbps
+Mono | 128 Kbps | 96 Kbps
+
+Note: There are no changes to default target bitrates for Dolby Digital (AC-3) and AAC audio formats.
+
+* Change the `--eac3` option in `other-transcode` to use Dolby Digital Plus format for _all_ transcoded audio instead of just surround output.
+* Deprecate the `--all-eac3` option in `other-transcode` since the `--eac3` option now has the same behavior.
+* Add a `--aac-stereo` option to `other-transcode`. This uses AAC format for transcoded stereo audio output so it can be paired with `--eac3` to get that option's old behavior.
+* Add a `--8-bit-vc1` option. When the color depth is currently 10-bit, this option uses an 8-bit color depth _for video inputs in VC-1 format only_.
+
 ## [0.6.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.6.0)
 
 Tuesday, December 22, 2020
