@@ -4,6 +4,8 @@ This single document contains all of the notes created for each [release](https:
 
 ## [0.7.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.7.0)
 
+Monday, January 4, 2021
+
 * Modify `other-transcode` to lower default target bitrates in order to significantly reduce the size of transcoded output at the risk of a slight reduction in perceived quality. Via [ #89](https://github.com/donmelton/other_video_transcoding/issues/89).
 
 H.264 video:
