@@ -871,14 +871,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @stereo_encoder   = 'eac3'
       end
 
-      opts.on '--all-eac3' do
-        Kernel.warn '**********'
-        Kernel.warn 'Using deprecated option: --all-eac3'
-        Kernel.warn '**********'
-        @surround_encoder = 'eac3'
-        @stereo_encoder   = 'eac3'
-      end
-
       opts.on '--aac-stereo' do
         @stereo_encoder = nil
       end
