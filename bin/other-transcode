@@ -137,6 +137,8 @@ Video options:
 
     def usage10
       <<-HERE
+    --yadif-params KEY=VALUE[:KEY=VALUE]...
+                    override yadif deinterlace filter configuration
     --rc-maxrate FACTOR, --rc-bufsize FACTOR
                     set ratecontrol maximum rate and/or buffer size
                       as multiple of video bitrate target
@@ -333,6 +335,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @rate = nil
       @detelecine = false
       @enable_filters = true
+      @yadif_params = nil
       @maxrate = nil
       @bufsize = nil
       @vt_allow_sw = false
@@ -631,6 +634,14 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--no-filters' do
         @enable_filters = false
+      end
+
+      opts.on '--yadif-params ARG' do |arg|
+        arg.split ':' do |param|
+          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,]+$/
+        end
+
+        @yadif_params = arg
       end
 
       opts.on '--rc-maxrate ARG', Float do |arg|
@@ -1611,8 +1622,9 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       frame_rate_filter = nil
 
-      if deinterlace
-        frame_rate_filter = 'yadif' unless @encoder == 'copy'
+      if deinterlace and @encoder != 'copy'
+        frame_rate_filter = 'yadif'
+        frame_rate_filter += "=#{@yadif_params}" unless @yadif_params.nil?
       end
 
       unless @rate.nil?
