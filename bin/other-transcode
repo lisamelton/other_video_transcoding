@@ -128,7 +128,7 @@ Video options:
     --deinterlace   reduce interlace artifacts without changing frame rate
                       (applied automatically for some inputs)
     --rate FPS      force constant video frame rate
-                      (`24000/1001` applied automatically for some inputs)
+                      (disables automatic deinterlacing)
     --detelecine    drop duplicate frames to restore original frame rate
                       (disables any deinterlacing and forced frame rate)
     --no-filters    disable any automatic adjustments via filters
@@ -1604,28 +1604,21 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       deinterlace = @deinterlace
-      rate = @rate
 
-      if @enable_filters
-        if video['avg_frame_rate'] == '30000/1001' or video.fetch('field_order', 'progressive') != 'progressive'
-          deinterlace = true
-
-          if video['codec_name'] == 'mpeg2video' and video['avg_frame_rate'] != '25/1'
-            rate = '24000/1001'
-          end
-        end
+      if @enable_filters and video.fetch('field_order', 'progressive') != 'progressive'
+        deinterlace = true
       end
 
       frame_rate_filter = nil
 
       if deinterlace
-        frame_rate_filter = 'yadif=deint=interlaced' unless @encoder == 'copy'
+        frame_rate_filter = 'yadif' unless @encoder == 'copy'
       end
 
-      unless rate.nil?
+      unless @rate.nil?
         frame_rate_filter = '' if frame_rate_filter.nil?
         frame_rate_filter += ',' unless frame_rate_filter.empty?
-        frame_rate_filter += "fps=#{rate}"
+        frame_rate_filter += "fps=#{@rate}"
       end
 
       if @detelecine
