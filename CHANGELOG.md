@@ -2,6 +2,19 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.8.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.8.0)
+
+Saturday, February 13, 2021
+
+* Modify `other-transcode` to:
+    * No longer automatically deinterlace video with a frame rate of 29.97 FPS.
+    * No longer change the frame rate of any video in MPEG-2 format which was automatically deinterlaced.
+    * Only automatically deinterlace non-progressive video.
+    * Apply any automatic or explicit deinterlacing to all frames of the video, not just the interlaced frames.
+    * Force a constant frame rate for any video in MPEG-2 format at 29.97 FPS.
+* Add a `--yadif-params` option to `other-transcode` to allow customization of the `yadif` filter used for deinterlacing.
+* Remove the deprecated `--all-eac3` option of `other-transcode`.
+
 ## [0.7.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.7.0)
 
 Monday, January 4, 2021
