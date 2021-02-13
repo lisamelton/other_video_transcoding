@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name                  = 'other_video_transcoding'
-  s.version               = '0.7.0'
+  s.version               = '0.8.0'
   s.required_ruby_version = '>= 2.0'
   s.summary               = 'Other tools to transcode videos.'
   s.description           = <<-HERE
