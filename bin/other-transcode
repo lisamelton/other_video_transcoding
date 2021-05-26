@@ -1888,7 +1888,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       encode_options += ['-allow_sw:v', '1'] if @encoder =~ /videotoolbox$/ and @vt_allow_sw
 
       if @encoder =~ /nvenc$/
-        encode_options += ['-rc:v', @nvenc_rc_mode]
         encode_options += ['-spatial-aq:v', '1']                      if @nvenc_spatial_aq
         encode_options += ['-temporal-aq:v', '1']                     if @nvenc_temporal_aq
         encode_options += ['-rc-lookahead:v', @nvenc_lookahead.to_s]  unless @nvenc_lookahead.nil?
