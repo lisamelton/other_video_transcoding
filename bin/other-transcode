@@ -148,6 +148,12 @@ Apple Video Toolbox encoder options:
     --vt-allow-sw   allow software encoding
 
 Nvidia video encoder options:
+    --nvenc-recommended
+                    apply optimal quality settings, equivalent to using:
+                      `--nvenc-spatial-aq`
+                      `--nvenc-lookahead 32`
+                      `--nvenc-bframe-refs middle`
+                      (not supported on all Nvidia hardware)
     --nvenc-spatial-aq
                     enable spatial adaptive quantization (AQ)
     --nvenc-temporal-aq
@@ -673,6 +679,13 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       opts.on '--vt-allow-sw' do
         @encoder = @hevc ? 'hevc_videotoolbox' : 'h264_videotoolbox'
         @vt_allow_sw = true
+      end
+
+      opts.on '--nvenc-recommended' do
+        @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
+        @nvenc_spatial_aq = true
+        @nvenc_lookahead = 32
+        @nvenc_bframe_refs = 'middle'
       end
 
       opts.on '--nvenc-spatial-aq' do
