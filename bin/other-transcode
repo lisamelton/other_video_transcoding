@@ -168,6 +168,8 @@ Nvidia video encoder options:
                     set maximum number of B-frames
     --nvenc-bframe-refs each|middle
                     set mode for using B-frames as reference frames
+    --nvenc-cq QUALITY
+                    use constant quality (CQ) ratecontrol at target quality
 
 Intel Quick Sync video encoder options:
     --qsv-refs FRAMES
@@ -352,6 +354,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @nvenc_refs = nil
       @nvenc_bframes = nil
       @nvenc_bframe_refs = nil
+      @nvenc_cq = nil
       @qsv_refs = nil
       @qsv_bframes = nil
       @amf_quality = nil
@@ -572,6 +575,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           @target = [arg.to_i, 1].max
         end
 
+        @nvenc_cq = nil
         @encoder = nil if @encoder == 'copy'
       end
 
@@ -735,6 +739,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         else
           fail UsageError, "invalid B-frames as references argument: #{arg}"
         end
+      end
+
+      opts.on '--nvenc-cq ARG', Float do |arg|
+        @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
+        @nvenc_cq = [[arg, 0].max, 51].min.to_s.sub(/\.0$/, '')
       end
 
       opts.on '--nvenc-rc-mode ARG' do |arg|
@@ -1023,6 +1032,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         end
       end
 
+      @nvenc_cq = nil unless @encoder =~ /nvenc$/
       @ten_bit = (@hevc and @encoder =~ /(nvenc|qsv|x265)$/ ? true : false) if @ten_bit.nil?
       @target_2160p ||= @hevc ? 8000 : 12000
       @target_1080p ||= @hevc ? 4000 :  6000
@@ -1864,7 +1874,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       text = "#{sprintf("%2d", video['index'])} = #{@encoder}"
 
       unless @encoder == 'copy'
-        text += " / #{bitrate} Kbps"
+        text += " / #{bitrate} Kbps" if @nvenc_cq.nil?
         text += " / #{@preset}" unless @preset.nil?
       end
 
@@ -1875,7 +1885,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       Kernel.warn text
       encode_options += ['-c:v', @encoder]
       encode_options += ['-pix_fmt:v', (@encoder =~ /(nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if ten_bit
-      encode_options += ['-b:v', "#{bitrate}k"] unless @encoder == 'copy'
+      encode_options += (@nvenc_cq.nil? ? ['-b:v', "#{bitrate}k"] : ['-cq:v', @nvenc_cq]) unless @encoder == 'copy'
       encode_options += ['-maxrate:v', "#{maxrate}k"] if maxrate > 0
       encode_options += ['-bufsize:v', "#{bufsize}k"] if bufsize > 0
       encode_options += ['-preset:v', @preset] unless @preset.nil?
