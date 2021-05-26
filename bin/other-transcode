@@ -1827,7 +1827,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
         bufsize = @encoder == 'hevc_qsv' ? 0 : maxrate
 
-        unless @bufsize.nil? or (@bufsize == 0 and @encoder =~ /nvenc$/)
+        unless @bufsize.nil?
           bufsize = [[(@bufsize < bitrate ? bitrate * @bufsize : @bufsize).to_i, bitrate].max, maxrate].min
         end
       else
