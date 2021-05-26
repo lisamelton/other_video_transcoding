@@ -160,6 +160,8 @@ Nvidia video encoder options:
                     set number of reference frames
     --nvenc-bframes FRAMES
                     set maximum number of B-frames
+    --nvenc-bframe-refs each|middle
+                    set mode for using B-frames as reference frames
     --nvenc-rc-mode vbr|vbr_hq
                     set ratecontrol mode (default: vbr)
 
@@ -345,6 +347,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @nvenc_multipass = nil
       @nvenc_refs = nil
       @nvenc_bframes = nil
+      @nvenc_bframe_refs = nil
       @nvenc_rc_mode = 'vbr'
       @qsv_refs = nil
       @qsv_bframes = nil
@@ -711,6 +714,17 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       opts.on '--nvenc-bframes ARG', Integer do |arg|
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
         @nvenc_bframes = [[arg, 0].max, 4].min
+      end
+
+      opts.on '--nvenc-bframe-refs ARG' do |arg|
+        @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
+
+        @nvenc_bframe_refs = case arg
+        when 'each', 'middle'
+          arg
+        else
+          fail UsageError, "invalid B-frames as references argument: #{arg}"
+        end
       end
 
       opts.on '--nvenc-rc-mode ARG' do |arg|
@@ -1868,6 +1882,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         encode_options += ['-multipass:v', @nvenc_multipass]          unless @nvenc_multipass.nil?
         encode_options += ['-refs:v', @nvenc_refs.to_s]               unless @nvenc_refs.nil?
         encode_options += ['-bf:v', @nvenc_bframes.to_s]              unless @nvenc_bframes.nil?
+        encode_options += ['-b_ref_mode:v', @nvenc_bframe_refs]       unless @nvenc_bframe_refs.nil?
       end
 
       if @encoder =~ /qsv$/
