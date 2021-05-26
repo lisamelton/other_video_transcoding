@@ -139,9 +139,9 @@ Video options:
       <<-HERE
     --yadif-params KEY=VALUE[:KEY=VALUE]...
                     override yadif deinterlace filter configuration
-    --rc-maxrate FACTOR, --rc-bufsize FACTOR
+    --rc-maxrate FACTOR, --rc-bufsize FACTOR|BITRATE
                     set ratecontrol maximum rate and/or buffer size
-                      as multiple of video bitrate target
+                      as multiple of video bitrate target or specific bitrate
     --copy-video    disable transcoding and copy original video track
 
 Apple Video Toolbox encoder options:
@@ -1773,19 +1773,19 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       if width > 1920 or height > 1080
         bitrate = @target_2160p
-        max_bitrate = 40000
+        max_bitrate = @hevc ? 25000 : 135000 # Level 5 HEVC Main 10 or H.264 Main
         max_dpb_mbs = 184320
       elsif width > 1280 or height > 720
         bitrate = @target_1080p
-        max_bitrate = 20000
+        max_bitrate = @hevc ? 12000 : 20000 # Level 4
         max_dpb_mbs = 32768
       elsif width > 720 or height > 576
         bitrate = @target_720p
-        max_bitrate = 10000
+        max_bitrate = @hevc ? 10000 : 14000 # Level 3.1
         max_dpb_mbs = 18000
       else
         bitrate = @target_480p
-        max_bitrate = 5000
+        max_bitrate = @hevc ? 6000 : 10000 # Level 3
         max_dpb_mbs = 8100
 
         unless hdr
@@ -1796,23 +1796,22 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       bitrate = @target unless @target.nil?
       bitrate = [bitrate, max_bitrate].min
-      maxrate = 0
-      bufsize = 0
 
       if @encoder =~ /(nvenc|hevc_qsv|libx26[45])$/
-        if @maxrate.nil?
-          maxrate = bitrate * 3
-        else
-          maxrate = [[(bitrate * @maxrate).to_i, (bitrate * 1.5).to_i].max, bitrate * 3].min
+        maxrate = [max_bitrate, bitrate * 2].max
+
+        unless @maxrate.nil?
+          maxrate = [[(@maxrate < bitrate ? bitrate * @maxrate : @maxrate).to_i, bitrate].max, maxrate].min
         end
 
-        if @bufsize.nil?
-          bufsize = maxrate if @encoder =~ /(nvenc|libx26[45])$/
-        else
-          unless @bufsize == 0 and @encoder =~ /nvenc$/
-            bufsize = [[(bitrate * @bufsize).to_i, bitrate].max, bitrate * 4].min
-          end
+        bufsize = @encoder == 'hevc_qsv' ? 0 : maxrate
+
+        unless @bufsize.nil? or (@bufsize == 0 and @encoder =~ /nvenc$/)
+          bufsize = [[(@bufsize < bitrate ? bitrate * @bufsize : @bufsize).to_i, bitrate].max, maxrate].min
         end
+      else
+        maxrate = 0
+        bufsize = 0
       end
 
       unless @preset.nil?
