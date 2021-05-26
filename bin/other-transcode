@@ -168,8 +168,6 @@ Nvidia video encoder options:
                     set maximum number of B-frames
     --nvenc-bframe-refs each|middle
                     set mode for using B-frames as reference frames
-    --nvenc-rc-mode vbr|vbr_hq
-                    set ratecontrol mode (default: vbr)
 
 Intel Quick Sync video encoder options:
     --qsv-refs FRAMES
@@ -354,7 +352,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @nvenc_refs = nil
       @nvenc_bframes = nil
       @nvenc_bframe_refs = nil
-      @nvenc_rc_mode = 'vbr'
       @qsv_refs = nil
       @qsv_bframes = nil
       @amf_quality = nil
@@ -741,14 +738,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       opts.on '--nvenc-rc-mode ARG' do |arg|
+        Kernel.warn '**********'
+        Kernel.warn 'Using deprecated option: --nvenc-rc-mode'
+        Kernel.warn '**********'
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
-
-        @nvenc_rc_mode = case arg
-        when 'vbr', 'vbr_hq'
-          arg
-        else
-          fail UsageError, "invalid rate control argument: #{arg}"
-        end
+        fail UsageError, "invalid rate control argument: #{arg}" unless arg =~ /^vbr(_hq)?$/
       end
 
       opts.on '--qsv-refs ARG', Integer do |arg|
@@ -1103,7 +1097,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         ] + (encoder =~ /vaapi$/ ? ['-filter:v', 'format=nv12,hwupload'] : []) + [
           '-c:v', encoder,
           '-b:v', '1000k'
-        ] + (encoder =~ /nvenc$/ ? ['-rc:v', @nvenc_rc_mode] : []) +
+        ] + (encoder =~ /nvenc$/ ? ['-rc:v', 'vbr'] : []) +
             (encoder == 'h264_qsv' ? ['-look_ahead:v', '1'] : []) +
             (encoder == 'hevc_qsv' ? ['-load_plugin:v', 'hevc_hw'] : []) +
             (encoder =~ /amf$/ ? ['-rc:v', 'vbr_latency'] : []) + [
