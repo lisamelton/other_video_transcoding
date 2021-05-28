@@ -1860,7 +1860,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       text = "#{sprintf("%2d", video['index'])} = #{@encoder}"
 
       unless @encoder == 'copy'
-        text += " / #{bitrate} Kbps" if @nvenc_cq.nil?
+        text += @nvenc_cq.nil? ? " / #{bitrate} Kbps" : " / #{@nvenc_cq} CQ"
         text += " / #{@preset}" unless @preset.nil?
       end
 
