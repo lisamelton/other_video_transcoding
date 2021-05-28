@@ -746,7 +746,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--nvenc-cq ARG', Float do |arg|
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
-        @nvenc_cq = [[arg, 0].max, 51].min.to_s.sub(/\.0$/, '')
+        @nvenc_cq = [[arg, 1].max, 51].min.to_s.sub(/\.0$/, '')
       end
 
       opts.on '--nvenc-rc-mode ARG' do |arg|
