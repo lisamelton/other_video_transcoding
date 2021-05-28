@@ -272,6 +272,9 @@ Audio options:
     def usage18
       <<-HERE
     --aac-stereo    use AAC format for stereo audio
+    --aac-only       "   "    "    for all audio
+                      (disables passthrough of audio in other formats)
+                      (default bitrates: 341 for surround, 128 for stereo)
     --limit-ac3-surround
                     don't copy surround audio in AC-3 format
                       when orginal bitrate is above transcoding bitrate
@@ -905,16 +908,23 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @stereo_encoder = nil
       end
 
+      opts.on '--aac-only' do
+        @surround_encoder = nil
+        @stereo_encoder   = nil
+      end
+
       opts.on '--limit-ac3-surround' do
         @keep_ac3_surround = false
       end
 
       opts.on '--keep-ac3-stereo' do
         @keep_ac3_stereo = true
+        @surround_encoder ||= 'ac3'
       end
 
       opts.on '--pass-dts' do
         @pass_dts = true
+        @surround_encoder ||= 'ac3'
       end
 
       opts.on '--add-subtitle ARG' do |arg|
@@ -1020,6 +1030,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         else
           @stereo_encoder = 'aac'
         end
+
+        @surround_encoder ||= @stereo_encoder
       end
 
       if @format == :mkv
@@ -2057,23 +2069,31 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         if track[:width] == :original
             encoder = 'copy'
         else
+          input_bitrate = track[:stream].fetch('bit_rate', '256').to_i / 1000
           dts = (codec_name == 'dts' and track[:stream].fetch('profile', 'DTS') =~ /^DTS(?:-ES)?$/)
 
           if track[:width] == :surround
-            if  ((codec_name == @surround_encoder or codec_name == 'ac3') and
-                (@keep_ac3_surround or (track[:stream]['bit_rate'].to_i / 1000) <= (@surround_bitrate.nil? ? 640 : @surround_bitrate.nil?))) or
+            if  (@surround_encoder =~ /ac3$/ and
+                (codec_name == @surround_encoder or codec_name == 'ac3') and
+                (@keep_ac3_surround or input_bitrate <= (@surround_bitrate.nil? ? 640 : @surround_bitrate.nil?))) or
                 (@pass_dts and dts)
               encoder = 'copy'
             elsif input_channels > 2
               encoder = @surround_encoder
               bitrate = @surround_bitrate
+
+              if encoder =~ /aac/
+                encoder = 'aac' if encoder == 'aac_at'
+                channels = 6
+              end
             end
           end
 
           if encoder.nil?
             if  input_channels <= 2 and (codec_name == 'aac' or
-                ((codec_name == @surround_encoder or codec_name == 'ac3') and
-                (@keep_ac3_stereo or (track[:stream]['bit_rate'].to_i / 1000) <= (@stereo_bitrate.nil? ? 256 : @stereo_bitrate))) or
+                (@surround_encoder =~ /ac3$/ and
+                (codec_name == @surround_encoder or codec_name == 'ac3') and
+                (@keep_ac3_stereo or input_bitrate <= (@stereo_bitrate.nil? ? 256 : @stereo_bitrate))) or
                 (@pass_dts and dts))
               encoder = 'copy'
             else
@@ -2102,7 +2122,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         configurations[input_index] = configuration
         text = "#{sprintf("%2d", input_index)} = #{encoder}"
         text += " / #{bitrate} Kbps" unless bitrate.nil?
-        text += ' / stereo' unless channels.nil?
+        text += ' / stereo' unless channels.nil? or channels > 2
         text += " / #{titles[input_index]}" if titles.has_key?(input_index)
         Kernel.warn text
         copy_track_name = (@copy_track_names or titles.has_key?(input_index))
