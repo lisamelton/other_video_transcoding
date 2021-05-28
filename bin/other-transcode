@@ -249,9 +249,9 @@ Audio options:
     def usage15
       <<-HERE
     --surround-bitrate BITRATE
-                    set surround audio bitrate (default: 640)
+                    set surround audio bitrate (default: 448)
     --stereo-bitrate BITRATE
-                    set stereo audio bitrate (default: 256)
+                    set stereo audio bitrate (default: 128)
       HERE
     end
 
@@ -265,7 +265,7 @@ Audio options:
     def usage17
       <<-HERE
     --eac3          use Dolby Digital Plus (E-AC-3) format for all audio
-                      (default bitrates: 384 for surround, 192 for stereo)
+                      (default bitrates: 448 for surround, 192 for stereo)
       HERE
     end
 
@@ -967,32 +967,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
     def configure(path)
       @audio_selections.uniq!
       @subtitle_selections.uniq!
-
-      if @surround_encoder == 'eac3'
-        @surround_bitrate ||= 384
-        @surround_bitrate = [[@surround_bitrate, 192].max, 768].min
-      else
-        @surround_bitrate ||= 640
-        @surround_bitrate = [[@surround_bitrate, 256].max, 640].min
-      end
-
-      if @stereo_encoder == 'eac3'
-        @stereo_bitrate ||= 192
-        @stereo_bitrate = [[@stereo_bitrate, 96].max, 768].min
-      else
-        @stereo_bitrate ||= 256
-        @stereo_bitrate = [[@stereo_bitrate, 128].max, 320].min
-      end
-
-      if @mono_bitrate.nil?
-        @mono_bitrate = @stereo_bitrate / 2
-      else
-        if @stereo_encoder == 'eac3'
-          @mono_bitrate = [[@mono_bitrate, 48].max, 768].min
-        else
-          @mono_bitrate = [[@mono_bitrate, 64].max, 256].min
-        end
-      end
 
       [
         ['ffprobe', '-loglevel', 'quiet', '-version'],
@@ -2000,15 +1974,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       audio_tracks = [{
         :stream => main_audio,
-        :width => width,
-        :bitrate => case width
-        when :stereo
-          @stereo_bitrate
-        when :surround
-          @surround_bitrate
-        when :original
-          nil
-        end
+        :width => width
       }]
 
       titles = {}
@@ -2022,15 +1988,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
         width = selection[:width]
 
-        bitrate = case width
-        when :stereo
-          @stereo_bitrate
-        when :surround
-          @surround_bitrate
-        when :original
-          nil
-        end
-
         unless selection[:track].nil?
           audio_track = 0
 
@@ -2042,8 +1999,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
             if audio_track == selection[:track]
               audio_tracks += [{
                 :stream => stream,
-                :width => width,
-                :bitrate => bitrate
+                :width => width
               }]
 
               break
@@ -2060,8 +2016,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
                 stream['index'] != main_audio['index']
               audio_tracks += [{
                 :stream => stream,
-                :width => width,
-                :bitrate => bitrate
+                :width => width
               }]
             end
           end
@@ -2076,8 +2031,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
             if title =~ /#{selection[:title]}/i and stream['index'] != main_audio['index']
               audio_tracks += [{
                 :stream => stream,
-                :width => width,
-                :bitrate => bitrate
+                :width => width
               }]
 
               titles[stream['index']] = title
@@ -2107,7 +2061,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
           if track[:width] == :surround
             if  ((codec_name == @surround_encoder or codec_name == 'ac3') and
-                (@keep_ac3_surround or (track[:stream]['bit_rate'].to_i / 1000) <= @surround_bitrate)) or
+                (@keep_ac3_surround or (track[:stream]['bit_rate'].to_i / 1000) <= (@surround_bitrate.nil? ? 640 : @surround_bitrate.nil?))) or
                 (@pass_dts and dts)
               encoder = 'copy'
             elsif input_channels > 2
@@ -2119,7 +2073,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           if encoder.nil?
             if  input_channels <= 2 and (codec_name == 'aac' or
                 ((codec_name == @surround_encoder or codec_name == 'ac3') and
-                (@keep_ac3_stereo or (track[:stream]['bit_rate'].to_i / 1000) <= @stereo_bitrate)) or
+                (@keep_ac3_stereo or (track[:stream]['bit_rate'].to_i / 1000) <= (@stereo_bitrate.nil? ? 256 : @stereo_bitrate))) or
                 (@pass_dts and dts))
               encoder = 'copy'
             else
