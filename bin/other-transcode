@@ -382,6 +382,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @mono_bitrate = nil
       @surround_encoder = 'ac3'
       @stereo_encoder = nil
+      @aac_fallback_encoder = 'aac'
       @keep_ac3_surround = true
       @keep_ac3_stereo = false
       @pass_dts = false
@@ -1027,6 +1028,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       if @stereo_encoder.nil?
         if encoders =~ /aac_at/ or encoders =~ /libfdk_aac/
           @stereo_encoder = $MATCH
+          @aac_fallback_encoder = 'libfdk_aac' if encoders =~ /libfdk_aac/
         else
           @stereo_encoder = 'aac'
         end
@@ -2087,7 +2089,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
               bitrate = @surround_bitrate
 
               if encoder =~ /aac/
-                encoder = 'aac' if encoder == 'aac_at'
+                encoder = @aac_fallback_encoder if encoder == 'aac_at'
                 channels = 6
               end
             end
