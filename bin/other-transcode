@@ -1870,12 +1870,16 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       Kernel.warn text
       encode_options += ['-c:v', @encoder]
-      encode_options += ['-pix_fmt:v', (@encoder =~ /(nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if ten_bit
+      encode_options += ['-pix_fmt:v', (@encoder =~ /(videotoolbox|nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if ten_bit
       encode_options += (@nvenc_cq.nil? ? ['-b:v', "#{bitrate}k"] : ['-cq:v', @nvenc_cq]) unless @encoder == 'copy'
       encode_options += ['-maxrate:v', "#{maxrate}k"] if maxrate > 0
       encode_options += ['-bufsize:v', "#{bufsize}k"] if bufsize > 0
       encode_options += ['-preset:v', @preset] unless @preset.nil?
-      encode_options += ['-allow_sw:v', '1'] if @encoder =~ /videotoolbox$/ and @vt_allow_sw
+
+      if @encoder =~ /videotoolbox$/
+        encode_options += ['-allow_sw:v', '1'] if @vt_allow_sw
+        encode_options += ['-profile:v', 'main10'] if ten_bit
+      end
 
       if @encoder =~ /nvenc$/
         encode_options += ['-spatial-aq:v', '1']                      if @nvenc_spatial_aq
