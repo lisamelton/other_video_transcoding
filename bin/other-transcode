@@ -1651,12 +1651,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       width   = video['width'].to_i
       height  = video['height'].to_i
 
-      if width == 720 and height == 576 and video['codec_name'] == 'mpeg2video'
-        pal = true
-      else
-        pal = false
-      end
-
       if crop.nil? or (crop == {:width => width, :height => height, :x => 0, :y => 0})
         crop_filter = nil
       else
@@ -1777,17 +1771,15 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         ]
       end
 
+      color_primaries = video['color_primaries']
+      color_trc       = video['color_transfer']
+      colorspace      = video['color_space']
       ten_bit = (@ten_bit ? (@eight_bit_vc1 ? (video['codec_name'] != 'vc1') : true) : false)
-      hdr = ((video.fetch('pix_fmt', 'yuv420p') == 'yuv420p10le') and ten_bit)
 
-      if hdr
-        color_primaries = 'bt2020'
-        color_trc       = 'smpte2084'
-        colorspace      = 'bt2020nc'
-      else
-        color_primaries = 'bt709'
-        color_trc       = 'bt709'
-        colorspace      = 'bt709'
+      if (video.fetch('pix_fmt', 'yuv420p') == 'yuv420p10le') and ten_bit
+        color_primaries ||= 'bt2020'
+        color_trc       ||= 'smpte2084'
+        colorspace      ||= 'bt2020nc'
       end
 
       if width > 1920 or height > 1080
@@ -1803,16 +1795,16 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         max_bitrate = @hevc ? 10000 : 14000 # Level 3.1
         max_dpb_mbs = 18000
       else
+        color_primaries ||= (width == 720 and height == 576 and video['codec_name'] == 'mpeg2video') ? 'bt470bg' : 'smpte170m'
+        colorspace      ||= 'smpte170m'
         bitrate = @target_480p
         max_bitrate = @hevc ? 6000 : 10000 # Level 3
         max_dpb_mbs = 8100
-
-        unless hdr
-          color_primaries = pal ? 'bt470bg' : 'smpte170m'
-          colorspace      = 'smpte170m'
-        end
       end
 
+      color_primaries ||= 'bt709'
+      color_trc       ||= 'bt709'
+      colorspace      ||= 'bt709'
       bitrate = @target unless @target.nil?
       bitrate = [bitrate, max_bitrate].min
 
