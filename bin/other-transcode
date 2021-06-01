@@ -1792,23 +1792,23 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       if width > 1920 or height > 1080
+        level = '5.1'
         bitrate = @target_2160p
         max_bitrate = @hevc ? 25000 : 135000 # Level 5 HEVC Main 10 or H.264 Main
-        max_dpb_mbs = 184320
       elsif width > 1280 or height > 720
+        level = '4'
         bitrate = @target_1080p
         max_bitrate = @hevc ? 12000 : 20000 # Level 4
-        max_dpb_mbs = 32768
       elsif width > 720 or height > 576
+        level = '3.1'
         bitrate = @target_720p
         max_bitrate = @hevc ? 10000 : 14000 # Level 3.1
-        max_dpb_mbs = 18000
       else
         color_primaries ||= (width == 720 and height == 576 and video['codec_name'] == 'mpeg2video') ? 'bt470bg' : 'smpte170m'
         colorspace      ||= 'smpte170m'
+        level = '3'
         bitrate = @target_480p
         max_bitrate = @hevc ? 6000 : 10000 # Level 3
-        max_dpb_mbs = 8100
       end
 
       color_primaries ||= 'bt709'
@@ -1927,20 +1927,10 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
             ]
           end
         else
-          max_refs = [(max_dpb_mbs / (((width + 15) / 16) * ((height + 15) / 16))), 16].min
-
           case @preset
-          when 'slow'
-            refs = 5
-          when 'slower'
-            refs = 8
-          when 'veryslow', 'placebo'
-            refs = 16
-          else
-            refs = 0
+          when 'slow', 'slower', 'veryslow', 'placebo'
+            encode_options += ['-level:v', level]
           end
-
-          encode_options += ['-refs:v', max_refs.to_s] if refs > max_refs
         end
 
         encode_options += ['-x264-params:v', @x264_params] unless @x264_params.nil?
