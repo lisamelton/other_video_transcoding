@@ -271,8 +271,7 @@ Audio options:
 
     def usage18
       <<-HERE
-    --aac-stereo    use AAC format for stereo audio
-    --aac-only       "   "    "    for all audio
+    --aac-only      use AAC format for all audio
                       (disables passthrough of audio in other formats)
                       (default bitrates: 341 for surround, 128 for stereo)
     --limit-ac3-surround
@@ -906,6 +905,9 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       opts.on '--aac-stereo' do
+        Kernel.warn '**********'
+        Kernel.warn 'Using deprecated option: --aac-stereo'
+        Kernel.warn '**********'
         @stereo_encoder = nil
       end
 
