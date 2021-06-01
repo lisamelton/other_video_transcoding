@@ -258,7 +258,7 @@ Audio options:
     def usage16
       <<-HERE
     --mono-bitrate BITRATE
-                    set mono audio bitrate (default: 50% of stereo bitrate)
+                    set mono audio bitrate (default: ~50% of stereo bitrate)
       HERE
     end
 
@@ -271,15 +271,17 @@ Audio options:
 
     def usage18
       <<-HERE
-    --aac-only      use AAC format for all audio
-                      (disables passthrough of audio in other formats)
+    --eac3-aac      use Dolby Digital Plus format only for surround audio
+                      with AAC format for stereo audio
+    --aac-only      use AAC format for all audio,
+                      disabling passthrough of audio in other formats
                       (default bitrates: 341 for surround, 128 for stereo)
     --limit-ac3-surround
                     don't copy surround audio in AC-3 format
-                      when orginal bitrate is above transcoding bitrate
+                      when orginal bitrate is above passthrough bitrate
     --keep-ac3-stereo
                     copy stereo and mono audio in AC-3 format
-                      even when orginal bitrate is above transcoding bitrate
+                      even when orginal bitrate is above passthrough bitrate
     --pass-dts      enable passthrough of audio in DTS and DTS-ES formats
       HERE
     end
@@ -902,6 +904,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       opts.on '--eac3' do
         @surround_encoder = 'eac3'
         @stereo_encoder   = 'eac3'
+      end
+
+      opts.on '--eac3-aac' do
+        @surround_encoder = 'eac3'
+        @stereo_encoder = nil
       end
 
       opts.on '--aac-stereo' do
