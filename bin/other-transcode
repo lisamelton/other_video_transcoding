@@ -2073,7 +2073,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
             if  (@surround_encoder =~ /aac/ and codec_name == 'aac') or
                 (@surround_encoder =~ /ac3$/ and
                 (codec_name == @surround_encoder or codec_name == 'ac3') and
-                (@keep_ac3_surround or input_bitrate <= (@surround_bitrate.nil? ? 640 : @surround_bitrate.nil?))) or
+                (@keep_ac3_surround or input_bitrate <= (@surround_bitrate.nil? ? 640 : @surround_bitrate))) or
                 (@pass_dts and dts)
               encoder = 'copy'
             elsif input_channels > 2
