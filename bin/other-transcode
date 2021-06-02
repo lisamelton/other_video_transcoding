@@ -2070,7 +2070,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           dts = (codec_name == 'dts' and track[:stream].fetch('profile', 'DTS') =~ /^DTS(?:-ES)?$/)
 
           if track[:width] == :surround
-            if  (@surround_encoder =~ /ac3$/ and
+            if  (@surround_encoder =~ /aac/ and codec_name == 'aac') or
+                (@surround_encoder =~ /ac3$/ and
                 (codec_name == @surround_encoder or codec_name == 'ac3') and
                 (@keep_ac3_surround or input_bitrate <= (@surround_bitrate.nil? ? 640 : @surround_bitrate.nil?))) or
                 (@pass_dts and dts)
