@@ -895,6 +895,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--stereo-bitrate ARG', Integer do |arg|
         @stereo_bitrate = arg
+        @mono_bitrate ||= @stereo_bitrate / 2
       end
 
       opts.on '--mono-bitrate ARG', Integer do |arg|
