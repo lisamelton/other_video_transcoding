@@ -2102,7 +2102,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           *(encoder == 'aac_at' ? ["-aac_at_mode:a:#{index}", 'cvbr'] : []),
           *(bitrate.nil? ? [] : ["-b:a:#{index}", "#{bitrate}k"]),
           *(channels.nil? ? [] : ["-ac:a:#{index}", "#{channels}"]),
-          *(track[:stream]['sample_rate'] != '48000' ? ["-ar:a:#{index}", '48000'] : []),
+          *((encoder != 'copy' and track[:stream]['sample_rate'] != '48000') ? ["-ar:a:#{index}", '48000'] : []),
           *(copy_track_name ? [] : ["-metadata:s:a:#{index}", 'title=']),
           "-disposition:a:#{index}", (index == 0 ? 'default' : '0')
         ]
