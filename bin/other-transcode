@@ -1092,17 +1092,17 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         IO.popen([
           'ffmpeg',
           '-loglevel', 'quiet',
-          '-nostdin'
-        ] + (encoder =~ /vaapi$/ ? ['-vaapi_device', '/dev/dri/renderD128'] : []) + [
+          '-nostdin',
+          *(encoder =~ /vaapi$/ ? ['-vaapi_device', '/dev/dri/renderD128'] : []),
           '-i', path,
-          '-frames:v', '1'
-        ] + (encoder =~ /vaapi$/ ? ['-filter:v', 'format=nv12,hwupload'] : []) + [
+          '-frames:v', '1',
+          *(encoder =~ /vaapi$/ ? ['-filter:v', 'format=nv12,hwupload'] : []),
           '-c:v', encoder,
-          '-b:v', '1000k'
-        ] + (encoder =~ /nvenc$/ ? ['-rc:v', 'vbr'] : []) +
-            (encoder == 'h264_qsv' ? ['-look_ahead:v', '1'] : []) +
-            (encoder == 'hevc_qsv' ? ['-load_plugin:v', 'hevc_hw'] : []) +
-            (encoder =~ /amf$/ ? ['-rc:v', 'vbr_latency'] : []) + [
+          '-b:v', '1000k',
+          *(encoder =~ /nvenc$/ ? ['-rc:v', 'vbr'] : []),
+          *(encoder == 'h264_qsv' ? ['-look_ahead:v', '1'] : []),
+          *(encoder == 'hevc_qsv' ? ['-load_plugin:v', 'hevc_hw'] : []),
+          *(encoder =~ /amf$/ ? ['-rc:v', 'vbr_latency'] : []),
           '-an',
           '-sn',
           '-ignore_unknown',
@@ -1181,16 +1181,16 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       ffmpeg_command = [
         'ffmpeg',
         '-loglevel', (@debug ? 'verbose' : 'error'),
-        '-stats'
-      ] + time_options +
-          decode_options + [
-        '-i', path
-      ] + (@max_muxing_queue_size.nil? ? [] : ['-max_muxing_queue_size', @max_muxing_queue_size.to_s]) +
-          encode_options +
-          get_audio_options(media_info) +
-          get_subtitle_options(media_info, burn_subtitle) + [
-        '-metadata:g', 'title='
-      ] + (@format == :mkv ? ['-default_mode', 'passthrough'] : ['-movflags', 'disable_chpl']) + [
+        '-stats',
+        *time_options,
+        *decode_options,
+        '-i', path,
+        *(@max_muxing_queue_size.nil? ? [] : ['-max_muxing_queue_size', @max_muxing_queue_size.to_s]),
+        *encode_options,
+        *get_audio_options(media_info),
+        *get_subtitle_options(media_info, burn_subtitle),
+        '-metadata:g', 'title=',
+        *(@format == :mkv ? ['-default_mode', 'passthrough'] : ['-movflags', 'disable_chpl']),
         output_path
       ]
 
@@ -2098,12 +2098,12 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
         options += [
           '-map', "0:#{input_index}",
-          "-c:a:#{index}", encoder
-        ] + (encoder == 'aac_at' ? ["-aac_at_mode:a:#{index}", 'cvbr'] : []) +
-            (bitrate.nil? ? [] : ["-b:a:#{index}", "#{bitrate}k"]) +
-            (channels.nil? ? [] : ["-ac:a:#{index}", "#{channels}"]) +
-            (track[:stream]['sample_rate'] != '48000' ? ["-ar:a:#{index}", '48000'] : []) +
-            (copy_track_name ? [] : ["-metadata:s:a:#{index}", 'title=']) + [
+          "-c:a:#{index}", encoder,
+          *(encoder == 'aac_at' ? ["-aac_at_mode:a:#{index}", 'cvbr'] : []),
+          *(bitrate.nil? ? [] : ["-b:a:#{index}", "#{bitrate}k"]),
+          *(channels.nil? ? [] : ["-ac:a:#{index}", "#{channels}"]),
+          *(track[:stream]['sample_rate'] != '48000' ? ["-ar:a:#{index}", '48000'] : []),
+          *(copy_track_name ? [] : ["-metadata:s:a:#{index}", 'title=']),
           "-disposition:a:#{index}", (index == 0 ? 'default' : '0')
         ]
 
