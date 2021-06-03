@@ -323,7 +323,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @detect = false
       @preview = false
       @format = :mkv
-      @mkv_options = []
       @copy_track_names = false
       @max_muxing_queue_size = nil
       @dry_run = false
@@ -1045,11 +1044,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
         @surround_encoder ||= @stereo_encoder
       end
-
-      if @format == :mkv
-        capabilities = get_muxer_capabilities
-        @mkv_options = ['-default_mode', 'passthrough'] if capabilities =~ /passthrough/
-      end
     end
 
     def verify_tool_availability(command)
@@ -1126,30 +1120,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       $CHILD_STATUS.exitstatus == 0
     end
 
-    def get_muxer_capabilities
-      Kernel.warn 'Getting muxer capabilities...'
-      output = ''
-
-      begin
-        IO.popen([
-          'ffmpeg',
-          '-loglevel', 'quiet',
-          '-h', 'muxer=matroska'
-        ], :err=>[:child, :out]) do |io|
-          io.each do |line|
-            Kernel.warn line if @debug
-            output += line
-          end
-        end
-      rescue SystemCallError => e
-        raise "getting muxer capabilities failed: #{e}"
-      end
-
-      fail 'getting muxer capabilities failed' unless $CHILD_STATUS.exitstatus == 0
-
-      output
-    end
-
     def process_input(path)
       seconds = Time.now.tv_sec
 
@@ -1220,7 +1190,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           get_audio_options(media_info) +
           get_subtitle_options(media_info, burn_subtitle) + [
         '-metadata:g', 'title='
-      ] + (@format == :mkv ? @mkv_options : ['-movflags', 'disable_chpl']) + [
+      ] + (@format == :mkv ? ['-default_mode', 'passthrough'] : ['-movflags', 'disable_chpl']) + [
         output_path
       ]
 
