@@ -1350,10 +1350,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         index += 1
         puts "\##{index} subtitle:"
         print "      format = #{stream['codec_name']}"
-        frames = stream.fetch('tags', {}).fetch('NUMBER_OF_FRAMES-eng', '')
+        tags = stream.fetch('tags', {})
+        frames = tags.fetch('NUMBER_OF_FRAMES', tags.fetch('NUMBER_OF_FRAMES-eng', ''))
         puts frames.empty? ? '' : " / #{frames} " + (frames == 1 ? 'frame' : 'frames')
-        puts "    language = #{stream.fetch('tags', {}).fetch('language', '')}"
-        title = stream.fetch('tags', {}).fetch('title', '')
+        puts "    language = #{tags.fetch('language', '')}"
+        title = tags.fetch('title', '')
         puts "       title = #{title}" unless title.empty?
         default = (stream['disposition']['default'] == 1)
         forced  = (stream['disposition']['forced'] == 1)
@@ -1368,8 +1369,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
     end
 
     def get_bitrate(stream)
-      bitrate = stream.fetch('bit_rate', '')
-      bitrate = stream.fetch('tags', {}).fetch('BPS-eng', '') if bitrate.empty?
+      tags = stream.fetch('tags', {})
+      bitrate = stream.fetch('bit_rate', tags.fetch('BPS', tags.fetch('BPS-eng', '')))
       return nil if bitrate.empty?
 
       bitrate.to_i / 1000
