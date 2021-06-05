@@ -2,6 +2,39 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.9.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.9.0)
+
+Saturday, June 5, 2021
+
+Nvidia encoders:
+
+* Add a `--nvenc-recommended` option to `other-transcode` which easily and optimally configures the Nvidia H.264 and HEVC video encoders, equivalent to using:
+    * `--nvenc-spatial-aq --nvenc-lookahead 32 --nvenc-bframe-refs middle`
+* The `--nvenc-bframe-refs` option is also new and using `middle` as its argument increases compression efficiency. However, it's not supported on all Nvidia hardware. Which means, neither is the `--nvenc-recommended` option.
+* So, using `--nvenc-recommended` for H.264 encoding requires at minimum a fourth generation Pascal-based GPU like the GTX 1080. And using it for HEVC encoding requires at minimum a more recent sixth generation Turing-based model like the GTX 1660 or RTX 2070.
+* Add a `--nvenc-cq` option to `other-transcode` to allow constant quality (CQ) ratecontrol. This option ignores the target video bitrate and takes a single numerical argument between `1` and `51` with lower values indicating higher quality. However, only values between `25` and `30` are really practical for 1080p content. It's recommended to start with `--nvenc-cq 28` and adjust as needed. Fractional values are also supported.
+* While CQ ratecontrol can adapt better to extremely dynamic content compared to the default average bitrate (ABR) ratecontrol system, the output bitrates produced by CQ can vary significantly and it can be slightly more prone to color banding with the H.264 encoder. So, for now, consider the `--nvenc-cq` option an experimental feature.
+* Deprecate the `--nvenc-rc-mode` option in `other-transcode` because maximum rate and buffer size values are already specified so an explicit ratecontrol mode is not required.
+
+Audio:
+
+* Modify `other-transcode` to no longer explicitly set audio bitrates and instead rely on the defaults from the audio encoders included with `ffmpeg`. This is being done to both simplify the code in `other-transcode` and to leverage the judgement of the audio encoder developers, which means:
+    * AC-3 surround audio is lowered from 640 Kbps to 448 Kbps.
+    * Dolby Digital Plus (Enhanced AC-3) surround audio is raised from 384 Kbps to 448 Kbps.
+    * AAC stereo audio is lowered from 256 Kbps to 128 Kbps when using the native `ffmpeg` or Apple AudioToolbox encoders.
+* If desired, use the `--surround-bitrate` and `--stereo-bitrate` options to restore the previous default audio bitrates.
+* Add a `--aac-only` option to `other-transcode` to force transcoding of all audio into AAC format, copying only tracks which are already in that format. Surround tracks are converted to a 5.1-channel AAC format at 341 Kbps when using the native `ffmpeg` encoder. This channel layout is compatible with most playback devices. Allowing more than 5.1 channels would significantly reduce playback compatibility.
+* Deprecate the `--aac-stereo` option in `other-transcode` and replace with a new `--eac3-aac` option, which uses Dolby Digital Plus format only for surround audio with AAC format for stereo audio. Since the `--aac-stereo` option only made sense when used in combination with the `--eac3` option, this makes `--eac3-aac` more convenient.
+
+Other changes:
+
+* Change the default ratecontrol maximum rate and buffer size values in `other-transcode`, as well as how those values increased when the target video bitrate is increased. The default values now also differ depending on whether the output video is in H.264 or HEVC format.
+* Modify the `--rc-maxrate` and `--rc-bufsize` options in `other-transcode` to allow specific bitrates as arguments and not just multiples of the video bitrate target. These options are most useful for lowering maximum rate and buffer size values. To raise those values, increase the target video bitrate instead.
+* Change the pixel format and force a Main 10 video profile in `other-transcode` when using the Apple VideoToolbox encoder to create output with a 10-bit color depth. Correct generation of 10-bit output requires macOS Big Sur or later.
+* Modify `other-transcode` to copy the three basic color properties (primaries, transer and space) from the input to the output when those properties are availabe. Otherwise use some sensible defaults.
+* Modify `other-transcode` to force a H.264 level when using `--x264` with slower presets. This ensures that the `x264` encoder continues to generate a video stream compatible with most playback devices when those presets are used.
+* Modify `other-transcode` to remove the hack which avoids using the Matroksa muxer `-disposition` option in old versions of `ffmpeg`. This means version 4.3 or later of `ffmpeg` is now required to run `other-transcode`.
+
 ## [0.8.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.8.0)
 
 Saturday, February 13, 2021
@@ -59,7 +92,7 @@ Tuesday, December 22, 2020
 * Lower the default target bitrates for 8-bit HEVC video in `other-transcode` to match the defaults for 10-bit HEVC video. This means, for example, the default target for HEVC at a 1080p resolution will be 6000 Kbps no matter the output bit depth.
 * Modify `other-transcode` to set the video buffer size equal to the maximum video bitrate when using an Nvidia encoder, essentially adding `--rc-bufsize 3` to the command line. Previously the buffer size was never explicitly set so `ffmpeg` would use a default value of twice the target bitrate. Since the maximum bitrate is normally three times the target bitrate this meant the buffer size was actually smaller than the maximum. While this didn't cause any known problems, Nvidia recommends a larger buffer size to improve quality. However, using `--rc-bufsize 0` will restore the old behavior and the default value from `ffmpeg`.
 * Ignore the `--nvenc-lookahead` option in `other-transcode` when the argument is `0` since such a value won't change the behavior of an Nvidia encoder anyway.
-* Add a `--limit-ac3-surround` option to `other-transcode` which prevents surround audio in AC-3 or Dolby Digital Plus (Enhanced AC-3) format from being copied instead of transcoded when the orginal bitrate is above the transcoding bitrate. This allows setting a lower target with the `--surround-bitrate` option in order to force higher-bitrate tracks to be transcoded instead of copied. 
+* Add a `--limit-ac3-surround` option to `other-transcode` which prevents surround audio in AC-3 or Dolby Digital Plus (Enhanced AC-3) format from being copied instead of transcoded when the orginal bitrate is above the transcoding bitrate. This allows setting a lower target with the `--surround-bitrate` option in order to force higher-bitrate tracks to be transcoded instead of copied.
 * Reduce the minimum bitrates for Dolby Digital Plus audio in `other-transcode` from 256, 128 and 64 Kbps for surround, stereo and mono layouts to 192, 96 and 48 Kbps. The default bitrates for Dolby Digital Plus audio remain the same and this change does not affect audio output in AC-3 or AAC formats.
 
 ## [0.5.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.5.0)
