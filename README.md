@@ -48,7 +48,7 @@ And this command to update it:
 
     gem update other_video_transcoding
 
-_The commands to install and update may need prefixing with_ `sudo` _on some platforms._
+_The commands to install and update may need postfixing with_ `--user-install` _on some platforms._
 
 The `other-transcode` tool in this package requires other software to function properly, specifically these command line programs:
 
