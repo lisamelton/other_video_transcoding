@@ -1753,7 +1753,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       color_primaries = video['color_primaries']
-      color_trc       = video['color_transfer']
+      color_trc       = video['color_transfer'] == 'bt470bg' ? 'gamma28' : video['color_transfer']
       colorspace      = video['color_space']
       ten_bit = (@ten_bit ? (@eight_bit_vc1 ? (video['codec_name'] != 'vc1') : true) : false)
 
