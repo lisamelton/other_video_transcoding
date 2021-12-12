@@ -140,7 +140,7 @@ Options:
 
         stats = content.match(/^frame=.*[.0-9]+x */m).to_s.lines.last.to_s.rstrip
 
-        if stats =~ /frame=([0-9]+) fps=( *[.0-9]+)/
+        if stats =~ /frame=( *[0-9]+) fps=( *[.0-9]+)/
           frames = $1
           fps = $2
           seconds = frames.to_f / fps.lstrip.to_f
