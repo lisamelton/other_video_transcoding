@@ -193,6 +193,9 @@ Video Acceleration API encoder options:
                     set numeric level of compression
 
 x264 software video encoder options:
+    --x264-cbr      use constant bitrate (CBR) ratecontrol
+                      with variable bitrate output
+                      (raises default video bitrate targets)
     --x264-avbr     use average variable bitrate (AVBR) ratecontrol
     --x264-mbtree   use macroblock-tree ratecontrol (disables AVBR if in use)
     --x264-quick    increase encoding speed by 70-80%
@@ -804,6 +807,16 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @vaapi_compression = [arg, 0].max
       end
 
+      opts.on '--x264-cbr' do
+        @encoder = 'libx264'
+        @hevc = false
+        @x264_mbtree = true
+        @x264_avbr = false
+        @x264_params = nil
+        @maxrate = 1.0
+        @bufsize = nil
+      end
+
       opts.on '--x264-avbr' do
         @encoder = 'libx264'
         @hevc = false
@@ -1028,10 +1041,19 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       @nvenc_cq = nil unless @encoder =~ /nvenc$/
       @ten_bit = (@hevc and @encoder =~ /(nvenc|qsv|x265)$/ ? true : false) if @ten_bit.nil?
-      @target_2160p ||= @hevc ? 8000 : 12000
-      @target_1080p ||= @hevc ? 4000 :  6000
-      @target_720p  ||= @hevc ? 2000 :  3000
-      @target_480p  ||= @hevc ? 1000 :  1500
+
+      if @encoder == 'libx264' and @x264_mbtree and @maxrate == 1.0
+        @target_2160p ||= 15000
+        @target_1080p ||= 7500
+        @target_720p  ||= 4500
+        @target_480p  ||= 2250
+      else
+        @target_2160p ||= @hevc ? 8000 : 12000
+        @target_1080p ||= @hevc ? 4000 :  6000
+        @target_720p  ||= @hevc ? 2000 :  3000
+        @target_480p  ||= @hevc ? 1000 :  1500
+      end
+
       @decode_method ||= @encoder =~ /nvenc$/ ? 'cuda' : 'auto'
 
       if @stereo_encoder.nil?
