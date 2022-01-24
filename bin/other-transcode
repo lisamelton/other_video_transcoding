@@ -658,7 +658,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--yadif-params ARG' do |arg|
         arg.split ':' do |param|
-          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,]+$/
+          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,\(\)]+$/
         end
 
         @yadif_params = arg
@@ -853,7 +853,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--x264-params ARG' do |arg|
         arg.split ':' do |param|
-          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,]+$/
+          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,\(\)]+$/
         end
 
         @encoder = 'libx264'
@@ -866,7 +866,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--x265-params ARG' do |arg|
         arg.split ':' do |param|
-          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,]+$/
+          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,\(\)]+$/
         end
 
         @encoder = 'libx265'
