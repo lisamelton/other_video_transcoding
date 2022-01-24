@@ -170,6 +170,8 @@ Nvidia video encoder options:
                     set mode for using B-frames as reference frames
     --nvenc-cq QUALITY
                     use constant quality (CQ) ratecontrol at target quality
+    --nvenc-gpu-only
+                    keep data on GPU for greater speed, if possible
 
 Intel Quick Sync video encoder options:
     --qsv-refs FRAMES
@@ -361,6 +363,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @nvenc_bframes = nil
       @nvenc_bframe_refs = nil
       @nvenc_cq = nil
+      @nvenc_gpu_only = false
       @qsv_refs = nil
       @qsv_bframes = nil
       @amf_quality = nil
@@ -751,6 +754,13 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       opts.on '--nvenc-cq ARG', Float do |arg|
         @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
         @nvenc_cq = [[arg, 1].max, 51].min.to_s.sub(/\.0$/, '')
+      end
+
+      opts.on '--nvenc-gpu-only' do
+        @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
+        @decode_scope = :all
+        @decode_method = 'cuda'
+        @nvenc_gpu_only = true
       end
 
       opts.on '--nvenc-rc-mode ARG' do |arg|
@@ -1686,6 +1696,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         decode_options = []
       end
 
+      nvenc_gpu_only = false
+
       if (@decode_scope == :vc1 and video['codec_name'] == 'vc1') or @decode_scope == :all
         if @encoder =~ /vaapi$/
           decode_options = [
@@ -1701,6 +1713,18 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           end
 
           decode_options += ['-hwaccel', decode_method]
+
+          if  @nvenc_gpu_only and
+              decode_method == 'cuda' and
+              @encoder =~ /nvenc$/ and
+              overlay_filter.nil? and
+              (frame_rate_filter.nil? or frame_rate_filter !~ /fps=/) and
+              crop_filter.nil? and
+              scale_filter.nil?
+            decode_options += ['-hwaccel_output_format', 'cuda']
+            nvenc_gpu_only = true
+            frame_rate_filter.sub!(/^yadif/, 'yadif_cuda') unless frame_rate_filter.nil?
+          end
 
           if  decode_method == 'qsv' and
               overlay_filter.nil? and
@@ -1734,8 +1758,14 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         end
       end
 
+      ten_bit = (@ten_bit ? (@eight_bit_vc1 ? (video['codec_name'] != 'vc1') : true) : false)
+      pix_fmt = true
+
       if @encoder =~ /vaapi$/ and not decode_options.include?('-hwaccel')
         conversion_filter = 'format=nv12,hwupload'
+      elsif nvenc_gpu_only
+        conversion_filter = "scale_cuda=format=#{ten_bit ? 'p010le' : 'yuv420p'}"
+        pix_fmt = false
       else
         conversion_filter = nil
       end
@@ -1779,7 +1809,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       color_trc       = 'gamma22' if color_trc == 'bt470m'
       color_trc       = 'gamma28' if color_trc == 'bt470bg'
       colorspace      = video['color_space']
-      ten_bit = (@ten_bit ? (@eight_bit_vc1 ? (video['codec_name'] != 'vc1') : true) : false)
 
       if (video.fetch('pix_fmt', 'yuv420p') == 'yuv420p10le') and ten_bit
         color_primaries ||= 'bt2020'
@@ -1869,7 +1898,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       Kernel.warn text
       encode_options += ['-c:v', @encoder]
-      encode_options += ['-pix_fmt:v', (@encoder =~ /(videotoolbox|nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if ten_bit
+      encode_options += ['-pix_fmt:v', (@encoder =~ /(videotoolbox|nvenc|qsv)$/ ? 'p010le' : 'yuv420p10le')] if ten_bit and pix_fmt
       encode_options += (@nvenc_cq.nil? ? ['-b:v', "#{bitrate}k"] : ['-cq:v', @nvenc_cq]) unless @encoder == 'copy'
       encode_options += ['-maxrate:v', "#{maxrate}k"] if maxrate > 0
       encode_options += ['-bufsize:v', "#{bufsize}k"] if bufsize > 0
