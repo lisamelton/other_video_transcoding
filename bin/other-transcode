@@ -1467,7 +1467,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
             '-ss', position.to_s,
             '-i', path,
             '-frames:v', '15',
-            '-filter:v', 'cropdetect=24:2',
+            '-filter:v', 'cropdetect=24.0/255:2',
             '-an',
             '-sn',
             '-ignore_unknown',
