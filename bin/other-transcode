@@ -763,14 +763,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @nvenc_gpu_only = true
       end
 
-      opts.on '--nvenc-rc-mode ARG' do |arg|
-        Kernel.warn '**********'
-        Kernel.warn 'Using deprecated option: --nvenc-rc-mode'
-        Kernel.warn '**********'
-        @encoder = @hevc ? 'hevc_nvenc' : 'h264_nvenc'
-        fail UsageError, "invalid rate control argument: #{arg}" unless arg =~ /^vbr(_hq)?$/
-      end
-
       opts.on '--qsv-refs ARG', Integer do |arg|
         @encoder = @hevc ? 'hevc_qsv' : 'h264_qsv'
         @qsv_refs = [arg, 0].max
