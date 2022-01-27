@@ -926,13 +926,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @stereo_encoder = nil
       end
 
-      opts.on '--aac-stereo' do
-        Kernel.warn '**********'
-        Kernel.warn 'Using deprecated option: --aac-stereo'
-        Kernel.warn '**********'
-        @stereo_encoder = nil
-      end
-
       opts.on '--aac-only' do
         @surround_encoder = nil
         @stereo_encoder   = nil
