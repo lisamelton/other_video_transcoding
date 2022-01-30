@@ -137,6 +137,8 @@ Video options:
 
     def usage10
       <<-HERE
+    --overlay-params KEY=VALUE[:KEY=VALUE]...
+                    override subtitle overlay filter configuration
     --yadif-params KEY=VALUE[:KEY=VALUE]...
                     override yadif deinterlace filter configuration
     --rc-maxrate FACTOR, --rc-bufsize FACTOR|BITRATE
@@ -351,6 +353,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @rate = nil
       @detelecine = false
       @enable_filters = true
+      @overlay_params = nil
       @yadif_params = nil
       @maxrate = nil
       @bufsize = nil
@@ -654,6 +657,14 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--no-filters' do
         @enable_filters = false
+      end
+
+      opts.on '--overlay-params ARG' do |arg|
+        arg.split ':' do |param|
+          fail UsageError, "invalid argument: #{arg}" unless param =~ /^[\w\-]+=[\w\-\.,\(\)]+$/
+        end
+
+        @overlay_params = arg
       end
 
       opts.on '--yadif-params ARG' do |arg|
@@ -1621,6 +1632,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         overlay_filter = nil
       else
         overlay_filter = "[0:#{burn_subtitle['index']}]overlay"
+        overlay_filter += "=#{@overlay_params}" unless @overlay_params.nil?
       end
 
       deinterlace = @deinterlace
