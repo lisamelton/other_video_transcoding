@@ -1269,6 +1269,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         Kernel.warn 'Done.'
       else
         add_track_statistics_tags output_path
+        ten_bit = (@ten_bit ? (@eight_bit_vc1 ? (video['codec_name'] != 'vc1') : true) : false)
+
+        if (video.fetch('pix_fmt', 'yuv420p') == 'yuv420p10le') and ten_bit
+          add_hdr_info path, output_path
+        end
       end
 
       Kernel.warn "\nElapsed time: #{seconds_to_time(Time.now.tv_sec - seconds)}\n\n"
@@ -2295,6 +2300,80 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       fail "adding track statistics tags failed: #{output_path}" unless $CHILD_STATUS.exitstatus == 0
+    end
+
+    def add_hdr_info(path, output_path)
+      hdr_info = ''
+
+      IO.popen([
+        'ffprobe',
+        '-loglevel', 'quiet',
+        '-select_streams', 'v:0',
+        '-show_frames',
+        '-read_intervals', '%+#1',
+        '-show_entries', 'frame=side_data_list',
+        '-print_format', 'json',
+        path
+      ]) do |io|
+        hdr_info = io.read
+      end
+
+      fail "scanning media failed: #{path}" unless $CHILD_STATUS.exitstatus == 0
+
+      begin
+        hdr_info = JSON.parse(hdr_info)
+      rescue JSON::JSONError
+        fail "media information not found: #{path}"
+      end
+
+      md = nil
+      cll = nil
+
+      hdr_info['frames'].each do |frame|
+        frame.fetch('side_data_list', []).each do |side_data|
+          if side_data['side_data_type'] == 'Mastering display metadata'
+            md = side_data if md.nil?
+          elsif side_data['side_data_type'] == 'Content light level metadata'
+            cll = side_data if cll.nil?
+          end
+        end
+      end
+
+      return if md.nil? or cll.nil?
+
+      Kernel.warn 'Adding HDR information...'
+
+      begin
+        IO.popen([
+          'mkvpropedit',
+          output_path,
+          '--edit', 'track:v1',
+          '--set', "max-content-light=#{cll['max_content']}",
+          '--set', "max-frame-light=#{cll['max_average']}",
+          '--set', "chromaticity-coordinates-red-x=#{eval md['red_x'] + '.0'}",
+          '--set', "chromaticity-coordinates-red-y=#{eval md['red_y'] + '.0'}",
+          '--set', "chromaticity-coordinates-green-x=#{eval md['green_x'] + '.0'}",
+          '--set', "chromaticity-coordinates-green-y=#{eval md['green_y'] + '.0'}",
+          '--set', "chromaticity-coordinates-blue-x=#{eval md['blue_x'] + '.0'}",
+          '--set', "chromaticity-coordinates-blue-y=#{eval md['blue_y'] + '.0'}",
+          '--set', "white-coordinates-x=#{eval md['white_point_x'] + '.0'}",
+          '--set', "white-coordinates-y=#{eval md['white_point_y'] + '.0'}",
+          '--set', "max-luminance=#{eval md['max_luminance'] + '.0'}",
+          '--set', "min-luminance=#{eval md['min_luminance'] + '.0'}"
+        ], 'rb') do |io|
+          Signal.trap 'INT' do
+            Process.kill 'INT', io.pid
+          end
+
+          io.each_char do |char|
+            STDERR.print char
+          end
+        end
+      rescue SystemCallError => e
+        raise "adding HDR information failed: #{e}"
+      end
+
+      fail "adding HDR information failed: #{output_path}" unless $CHILD_STATUS.exitstatus == 0
     end
   end
 end
