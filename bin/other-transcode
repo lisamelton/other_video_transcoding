@@ -298,6 +298,14 @@ Audio options:
     def usage19
       <<-HERE
 
+Fraunhofer FDK AAC audio encoder options:
+    --fdk-vbr MODE  set numeric variable bitrate (VBR) mode, from 1 to 5
+      HERE
+    end
+
+    def usage20
+      <<-HERE
+
 Subtitle options:
     --add-subtitle TRACK[=forced]|auto|all|LANGUAGE|STRING
                     add single subtitle track by number
@@ -398,6 +406,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @keep_ac3_surround = true
       @keep_ac3_stereo = false
       @pass_dts = false
+      @fdk_vbr_mode = nil
       @subtitle_selections = []
       @auto_add_subtitle = false
       @burn_subtitle_track = 0
@@ -414,14 +423,14 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
               puts  usage1 + usage2 + usage3 + usage4 + usage5 + usage6 +
                     usage7 + usage8 + usage9 + usage10 + usage11 + usage12 +
                     usage13 + usage14 + usage15 + usage16 + usage17 +
-                    usage18 + usage19
+                    usage18 + usage19 + usage20
             when 'more'
               puts  usage1 + usage2 + usage3 + usage4 + usage6 + usage7 +
                     usage8 + usage9 + usage11 + usage13 + usage15 + usage16 +
-                    usage17 + usage18 + usage19
+                    usage17 + usage18 + usage20
             else
               puts  usage1 + usage3 + usage6 + usage8 + usage11 + usage13 +
-                    usage15 + usage17 + usage19
+                    usage15 + usage17 + usage20
             end
 
             exit
@@ -962,6 +971,10 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       opts.on '--pass-dts' do
         @pass_dts = true
         @surround_encoder ||= 'ac3'
+      end
+
+      opts.on '--fdk-vbr ARG', Integer do |arg|
+        @fdk_vbr_mode = [[arg, 1].max, 5].min.to_s
       end
 
       opts.on '--add-subtitle ARG' do |arg|
@@ -2153,8 +2166,17 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         next if configurations[input_index] == configuration
 
         configurations[input_index] = configuration
+
+        if encoder == 'libfdk_aac' and not @fdk_vbr_mode.nil?
+          bitrate = nil
+          fdk_vbr_mode = @fdk_vbr_mode
+        else
+          fdk_vbr_mode = nil
+        end
+
         text = "#{sprintf("%2d", input_index)} = #{encoder}"
         text += " / #{bitrate} Kbps" unless bitrate.nil?
+        text += " / VBR mode #{fdk_vbr_mode}" unless fdk_vbr_mode.nil?
         text += ' / stereo' unless channels.nil? or channels > 2
         text += " / #{titles[input_index]}" if titles.has_key?(input_index)
         Kernel.warn text
@@ -2165,6 +2187,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           "-c:a:#{index}", encoder,
           *(encoder == 'aac_at' ? ["-aac_at_mode:a:#{index}", 'cvbr'] : []),
           *(bitrate.nil? ? [] : ["-b:a:#{index}", "#{bitrate}k"]),
+          *(fdk_vbr_mode.nil? ? [] : ["-vbr:a:#{index}", fdk_vbr_mode]),
           *(channels.nil? ? [] : ["-ac:a:#{index}", "#{channels}"]),
           *((encoder != 'copy' and track[:stream]['sample_rate'] != '48000') ? ["-ar:a:#{index}", '48000'] : []),
           *(copy_track_name ? [] : ["-metadata:s:a:#{index}", 'title=']),
