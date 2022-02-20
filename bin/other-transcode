@@ -195,8 +195,6 @@ AMD video encoder options:
 Video Acceleration API encoder options:
     --vaapi-compression LEVEL
                     set numeric level of compression
-    --vaapi-device PATH
-                    set device path (default: /dev/dri/renderD128)
 
 x264 software video encoder options:
     --x264-cbr      use constant bitrate (CBR) ratecontrol
@@ -385,7 +383,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @amf_refs = nil
       @amf_bframes = nil
       @vaapi_compression = nil
-      @vaapi_device = '/dev/dri/renderD128'
       @x264_avbr = false
       @x264_mbtree = false
       @x264_quick = false
@@ -832,11 +829,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         @vaapi_compression = [arg, 0].max
       end
 
-      opts.on '--vaapi-device ARG' do |arg|
-        @encoder = @hevc ? 'hevc_vaapi' : 'h264_vaapi'
-        @vaapi_device = arg
-      end
-
       opts.on '--x264-cbr' do
         @encoder = 'libx264'
         @hevc = false
@@ -1142,7 +1134,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
           'ffmpeg',
           '-loglevel', 'quiet',
           '-nostdin',
-          *(encoder =~ /vaapi$/ ? ['-vaapi_device', @vaapi_device] : []),
+          *(encoder =~ /vaapi$/ ? ['-vaapi_device', '/dev/dri/renderD128'] : []),
           '-i', path,
           '-frames:v', '1',
           *(encoder =~ /vaapi$/ ? ['-filter:v', 'format=nv12,hwupload'] : []),
@@ -1714,7 +1706,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       if @encoder =~ /vaapi$/
-        decode_options = ['-vaapi_device', @vaapi_device]
+        decode_options = ['-vaapi_device', '/dev/dri/renderD128']
       else
         decode_options = []
       end
@@ -1725,7 +1717,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
         if @encoder =~ /vaapi$/
           decode_options = [
             '-hwaccel', 'vaapi',
-            '-hwaccel_device', @vaapi_device,
+            '-hwaccel_device', '/dev/dri/renderD128',
             '-hwaccel_output_format', 'vaapi'
           ]
         else
