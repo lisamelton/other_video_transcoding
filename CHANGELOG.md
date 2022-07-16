@@ -2,6 +2,14 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.11.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.11.0)
+
+Saturday, July 16, 2022
+
+* Modify `other-transcode` to copy 10-bit high-dynamic-range (HDR10) metadata, extracting content light level and mastering display metadata from a HDR10 video frame input and tagging a 10-bit video stream output in Matroska (MKV) format with that information. This will also copy static HDR10 metadata from Dolby Vision and HDR10+ video streams but it will _not_ copy additional dynamic metadata from those formats.
+* Add a `--overlay-params` option to `other-transcode` to override the `overlay` filter configuration applied when burning subtitles. This is useful when cropping to move a subtitle within the output boundary.
+* Add a `--fdk-vbr` option to `other-transcode` to set the numeric variable bitrate (VBR) mode for the Fraunhofer `libfdk_aac` audio encoder, disabling constant bitrate (CBR) ratecontrol. VBR mode `1` selects the lowest quality and `5` the highest. Please note that the `libfdk_aac` encoder is not normally included with `ffmpeg` due to licensing restrictions and the `--fdk-vbr` option has no effect if that encoder is not available. Via [ #127](https://github.com/donmelton/other_video_transcoding/issues/127).
+
 ## [0.10.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.10.0)
 
 Thursday, January 27, 2022
