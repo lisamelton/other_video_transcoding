@@ -18,7 +18,7 @@ module Transcoding
   class Command
     def about
       <<-HERE
-other-transcode 0.10.0
+other-transcode 0.11.0
 Copyright (c) 2019-2022 Don Melton
       HERE
     end
