@@ -2,6 +2,12 @@
 
 This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
 
+## [0.12.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.12.0)
+
+Wednesday, October 12, 2022
+
+* Modify `other-transcode` to explicitly set the output layout for AC-3 and Dolby Digital Plus (Enhanced AC-3) surround audio formats to six channels when the input has more than six channels, typically with 7.1 surround audio. Otherwise new versions of `ffmpeg` will only create five channels and drop the LFE channel. Via [ #167](https://github.com/donmelton/other_video_transcoding/issues/167).
+
 ## [0.11.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.11.0)
 
 Saturday, July 16, 2022
