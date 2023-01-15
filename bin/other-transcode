@@ -18,7 +18,7 @@ module Transcoding
   class Command
     def about
       <<-HERE
-other-transcode 0.11.0
+other-transcode 0.12.0
 Copyright (c) 2019-2022 Don Melton
       HERE
     end
@@ -2131,6 +2131,8 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
               if encoder =~ /aac/
                 encoder = @aac_fallback_encoder if encoder == 'aac_at'
+                channels = 6
+              elsif input_channels > 6
                 channels = 6
               end
             end
