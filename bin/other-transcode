@@ -319,6 +319,9 @@ Subtitle options:
                     burn subtitle track by number into video
                       or enable automatic burning of forced subtitle
                       (only image-based subtitles are burned)
+    --convert-dvb-subs
+                   convert "DVB Subtitle" format subtitles to 
+                    "DVD Subtitle" format
 
 Other options:
 -h, --help [more|full]
@@ -407,6 +410,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       @subtitle_selections = []
       @auto_add_subtitle = false
       @burn_subtitle_track = 0
+      @convert_dvb_subs = false
     end
 
     def run
@@ -997,6 +1001,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
         @encoder = nil if @encoder == 'copy'
       end
+
+      opts.on '--convert-dvb-subs' do
+        @convert_dvb_subs = true
+      end
+
     end
 
     def resolve_time(arg)
@@ -2272,7 +2281,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
         options += [
           '-map', "0:#{subtitle['index']}",
-          "-c:s:#{index}", ((@format == :mp4 and subtitle['codec_name'] == 'subrip') ? 'mov_text' : 'copy'),
+          "-c:s:#{index}", get_subtitle_codec(subtitle),
           "-disposition:s:#{index}", (force ? 'default+forced' : '0')
         ]
 
@@ -2282,6 +2291,16 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       return ['-sn'] if options.empty?
 
       options
+    end
+
+    def get_subtitle_codec(subtitle)
+      out_codec = ((@format == :mp4 and subtitle['codec_name'] == 'subrip') ? 'mov_text' : 'copy')
+      
+      if subtitle['codec_name'] == 'dvb_subtitle' and @convert_dvb_subs
+        out_codec = 'dvdsub'
+      end
+      
+      return out_codec
     end
 
     def assemble_log(log_path, output)
