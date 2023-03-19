@@ -96,7 +96,7 @@ Or this on Linux and macOS:
 
     other-transcode /Rips/Movie.mkv
 
-On completion that command creates two files in the current working directory:
+On completion that command creates two files in the current working directory (unless you set a different path with `--output`):
 
     Movie.mkv
     Movie.mkv.log

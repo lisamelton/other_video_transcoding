@@ -50,6 +50,10 @@ Input options:
     def usage3
       <<-HERE
 Output options:
+    --output FILENAME|DIRECTORY
+                    set output path and filename, or just path
+                      (default: input filename with output format extension
+                        in current working directory)
     --debug         increase diagnostic information
     --scan          print media information and exit
     --preview-crop  show commands to preview detected video crop and exit
@@ -333,6 +337,7 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
     def initialize
       @position = nil
       @duration = nil
+      @output = nil
       @debug = false
       @scan = false
       @detect = false
@@ -466,6 +471,21 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
 
       opts.on '--duration ARG' do |arg|
         @duration = resolve_time(arg)
+      end
+
+      opts.on '--output ARG' do |arg|
+        unless File.directory? arg
+          @format = case File.extname(arg)
+          when '.mkv'
+            :mkv # COMBAK: Already the default. Chop this block?
+          when '.mp4'
+            :mp4
+          else
+            fail UsageError, "unsupported filename extension: #{arg}"
+          end
+        end
+
+        @output = arg
       end
 
       opts.on '--debug' do
@@ -1161,11 +1181,28 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       $CHILD_STATUS.exitstatus == 0
     end
 
+    def resolve_output(path)
+      output = File.basename(path, '.*') + '.' + @format.to_s
+
+      unless @output.nil?
+        abs_path = File.absolute_path(@output)
+
+        if File.directory? @output  # COMBAK: or abs_path?
+          output = abs_path + File::SEPARATOR + output
+        else
+          output = abs_path
+        end
+      end
+
+      fail "output file exists: #{output}" if File.exist? output
+      output
+    end
+
     def process_input(path)
       seconds = Time.now.tv_sec
 
       unless @scan or @detect
-        output_path = File.basename(path, '.*') + '.' + @format.to_s
+        output_path = resolve_output(path)
         fail_or_warn "output file already exists: #{output_path}" if File.exist? output_path
 
         log_path = output_path + '.log'
