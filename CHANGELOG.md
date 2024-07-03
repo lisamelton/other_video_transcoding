@@ -1,36 +1,36 @@
-# Changes to the "[Other Video Transcoding](https://github.com/donmelton/other_video_transcoding)" project
+# Changes to the "[Other Video Transcoding](https://github.com/lisamelton/other_video_transcoding)" project
 
-This single document contains all of the notes created for each [release](https://github.com/donmelton/other_video_transcoding/releases).
+This single document contains all of the notes created for each [release](https://github.com/lisamelton/other_video_transcoding/releases).
 
-## [0.12.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.12.0)
+## [0.12.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.12.0)
 
 Wednesday, October 12, 2022
 
-* Modify `other-transcode` to explicitly set the output layout for AC-3 and Dolby Digital Plus (Enhanced AC-3) surround audio formats to six channels when the input has more than six channels, typically with 7.1 surround audio. Otherwise new versions of `ffmpeg` will only create five channels and drop the LFE channel. Via [ #167](https://github.com/donmelton/other_video_transcoding/issues/167).
+* Modify `other-transcode` to explicitly set the output layout for AC-3 and Dolby Digital Plus (Enhanced AC-3) surround audio formats to six channels when the input has more than six channels, typically with 7.1 surround audio. Otherwise new versions of `ffmpeg` will only create five channels and drop the LFE channel. Via [ #167](https://github.com/lisamelton/other_video_transcoding/issues/167).
 
-## [0.11.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.11.0)
+## [0.11.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.11.0)
 
 Saturday, July 16, 2022
 
 * Modify `other-transcode` to copy 10-bit high-dynamic-range (HDR10) metadata, extracting content light level and mastering display metadata from a HDR10 video frame input and tagging a 10-bit video stream output in Matroska (MKV) format with that information. This will also copy static HDR10 metadata from Dolby Vision and HDR10+ video streams but it will _not_ copy additional dynamic metadata from those formats.
 * Add a `--overlay-params` option to `other-transcode` to override the `overlay` filter configuration applied when burning subtitles. This is useful when cropping to move a subtitle within the output boundary.
-* Add a `--fdk-vbr` option to `other-transcode` to set the numeric variable bitrate (VBR) mode for the Fraunhofer `libfdk_aac` audio encoder, disabling constant bitrate (CBR) ratecontrol. VBR mode `1` selects the lowest quality and `5` the highest. Please note that the `libfdk_aac` encoder is not normally included with `ffmpeg` due to licensing restrictions and the `--fdk-vbr` option has no effect if that encoder is not available. Via [ #127](https://github.com/donmelton/other_video_transcoding/issues/127).
+* Add a `--fdk-vbr` option to `other-transcode` to set the numeric variable bitrate (VBR) mode for the Fraunhofer `libfdk_aac` audio encoder, disabling constant bitrate (CBR) ratecontrol. VBR mode `1` selects the lowest quality and `5` the highest. Please note that the `libfdk_aac` encoder is not normally included with `ffmpeg` due to licensing restrictions and the `--fdk-vbr` option has no effect if that encoder is not available. Via [ #127](https://github.com/lisamelton/other_video_transcoding/issues/127).
 
-## [0.10.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.10.0)
+## [0.10.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.10.0)
 
 Thursday, January 27, 2022
 
 * Add a `--nvenc-gpu-only` option to `other-transcode` to keep data on the GPU for greater speed, if possible. Deinterlacing is allowed but cropping, scaling, detelecining, setting frame rates and burning subtitles will prevent this from working and may actually slow things down. Performance can also be affected negatively depending on PC configuration. Please note that the `--nvenc-gpu-only` option requires `ffmpeg` version 5.0 or later.
 * Add a `--x264-cbr` option to `other-transcode` to simplify access to constant bitrate (CBR) ratecontrol. Despite the name, actual output bitrates from the `x264` encoder are variable and below what might be expected. So, default video bitrate targets are raised to accommodate this.
-* Enable proper crop detection in `other-transcode` for 4K UHD Blu-ray rips and other media with a 10-bit color depth. This was done by changing the `limit` value passed to the `cropdetect` filter from an integer constant to a floating point equation. Via [ #52](https://github.com/donmelton/other_video_transcoding/issues/52).
-* Modify `other-transcode` to add a workaround for the mapping of BT.470 M and BT.470 BG color transfer characteristics from values returned from `ffprobe` to values actually used by `ffmpeg`. Via [ #112](https://github.com/donmelton/other_video_transcoding/issues/112).
-* Modify `other-transcode` to allow parentheses within the argument to the `--yadif-params`, `--x264-params` and `--x265-params` options. Via [ #119](https://github.com/donmelton/other_video_transcoding/issues/119).
-* Modify `ask-ffmpeg-log` to fix detection of frame counts less than five digits within `.log` files from very short duration videos. Via [ #126](https://github.com/donmelton/other_video_transcoding/issues/126).
+* Enable proper crop detection in `other-transcode` for 4K UHD Blu-ray rips and other media with a 10-bit color depth. This was done by changing the `limit` value passed to the `cropdetect` filter from an integer constant to a floating point equation. Via [ #52](https://github.com/lisamelton/other_video_transcoding/issues/52).
+* Modify `other-transcode` to add a workaround for the mapping of BT.470 M and BT.470 BG color transfer characteristics from values returned from `ffprobe` to values actually used by `ffmpeg`. Via [ #112](https://github.com/lisamelton/other_video_transcoding/issues/112).
+* Modify `other-transcode` to allow parentheses within the argument to the `--yadif-params`, `--x264-params` and `--x265-params` options. Via [ #119](https://github.com/lisamelton/other_video_transcoding/issues/119).
+* Modify `ask-ffmpeg-log` to fix detection of frame counts less than five digits within `.log` files from very short duration videos. Via [ #126](https://github.com/lisamelton/other_video_transcoding/issues/126).
 * Modify `ask-ffmpeg-log` to fix detection of statistics within `.log` files not generated by `other-transcode`.
 * Remove the deprecated `--nvenc-rc-mode` and `--aac-stereo` options from `other-transcode`.
 * Update all copyright notices to the year 2022.
 
-## [0.9.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.9.0)
+## [0.9.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.9.0)
 
 Saturday, June 5, 2021
 
@@ -63,7 +63,7 @@ Other changes:
 * Modify `other-transcode` to force a H.264 level when using `--x264` with slower presets. This ensures that the `x264` encoder continues to generate a video stream compatible with most playback devices when those presets are used.
 * Modify `other-transcode` to remove the hack which avoids using the Matroksa muxer `-disposition` option in old versions of `ffmpeg`. This means version 4.3 or later of `ffmpeg` is now required to run `other-transcode`.
 
-## [0.8.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.8.0)
+## [0.8.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.8.0)
 
 Saturday, February 13, 2021
 
@@ -76,11 +76,11 @@ Saturday, February 13, 2021
 * Add a `--yadif-params` option to `other-transcode` to allow customization of the `yadif` filter used for deinterlacing.
 * Remove the deprecated `--all-eac3` option of `other-transcode`.
 
-## [0.7.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.7.0)
+## [0.7.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.7.0)
 
 Monday, January 4, 2021
 
-* Modify `other-transcode` to lower default target bitrates in order to significantly reduce the size of transcoded output at the risk of a slight reduction in perceived quality. Via [ #89](https://github.com/donmelton/other_video_transcoding/issues/89).
+* Modify `other-transcode` to lower default target bitrates in order to significantly reduce the size of transcoded output at the risk of a slight reduction in perceived quality. Via [ #89](https://github.com/lisamelton/other_video_transcoding/issues/89).
 
 H.264 video:
 
@@ -113,7 +113,7 @@ Note: There are no changes to default target bitrates for Dolby Digital (AC-3) a
 * Add a `--aac-stereo` option to `other-transcode`. This uses AAC format for transcoded stereo audio output so it can be paired with `--eac3` to get that option's old behavior.
 * Add a `--8-bit-vc1` option. When the color depth is currently 10-bit, this option uses an 8-bit color depth _for video inputs in VC-1 format only_.
 
-## [0.6.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.6.0)
+## [0.6.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.6.0)
 
 Tuesday, December 22, 2020
 
@@ -123,14 +123,14 @@ Tuesday, December 22, 2020
 * Add a `--limit-ac3-surround` option to `other-transcode` which prevents surround audio in AC-3 or Dolby Digital Plus (Enhanced AC-3) format from being copied instead of transcoded when the orginal bitrate is above the transcoding bitrate. This allows setting a lower target with the `--surround-bitrate` option in order to force higher-bitrate tracks to be transcoded instead of copied.
 * Reduce the minimum bitrates for Dolby Digital Plus audio in `other-transcode` from 256, 128 and 64 Kbps for surround, stereo and mono layouts to 192, 96 and 48 Kbps. The default bitrates for Dolby Digital Plus audio remain the same and this change does not affect audio output in AC-3 or AAC formats.
 
-## [0.5.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.5.0)
+## [0.5.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.5.0)
 
 Tuesday, November 24, 2020
 
 * Add `--qsv-decoder` and `--qsv-device` options to `other-transcode`, both of which enable the scoped use of the Intel Quick Sync Video (QSV) decoder instead of the generic hardware decoder. These options can significantly speed operation of the QSV encoder, invoked via `--qsv`. It's recommended that `--decode all` be included when using these options to decode all video input formats. The `--qsv-device` option allows selection of specific hardware by number or path depending on platform. Please note that deinterlacing, cropping, scaling or using other filters will disable QSV's format-specific decoders.
 * Remove all deprecated options and arguments from `other-transcode`.
 
-## [0.4.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.4.0)
+## [0.4.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.4.0)
 
 Sunday, November 1, 2020
 
@@ -147,15 +147,15 @@ Sunday, November 1, 2020
 * Modify `other-transcode` to assume a video input without a `field_order` tag is progressive instead of interlaced so a deinterlace fliter is not automatically and incorrectly applied to that video. This avoids problems with some 4K Ultra HD Blu-ray rips.
 * Update the link to Docker containers for Linux in the "README" document. Thanks, @ttyS0!
 
-## [0.3.2](https://github.com/donmelton/other_video_transcoding/releases/tag/0.3.2)
+## [0.3.2](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.3.2)
 
 Friday, September 11, 2020
 
 * Modify `other-transcode` to use a new `ffmpeg` Matroksa muxer option so the `-disposition` option is once again honored when using `ffmpeg` version 4.3 and later.
-* Change the codec ID from the default of `hev1` to `hvc1` for HEVC video in MP4 output from `other-transcode` to enable playback in QuickTime on macOS. Via [ #50](https://github.com/donmelton/other_video_transcoding/issues/50).
-* Convert added SRT format subtitles to MOV-compatible format in MP4 output from `other-transcode`. Via [ #55](https://github.com/donmelton/other_video_transcoding/issues/55).
+* Change the codec ID from the default of `hev1` to `hvc1` for HEVC video in MP4 output from `other-transcode` to enable playback in QuickTime on macOS. Via [ #50](https://github.com/lisamelton/other_video_transcoding/issues/50).
+* Convert added SRT format subtitles to MOV-compatible format in MP4 output from `other-transcode`. Via [ #55](https://github.com/lisamelton/other_video_transcoding/issues/55).
 
-## [0.3.1](https://github.com/donmelton/other_video_transcoding/releases/tag/0.3.1)
+## [0.3.1](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.3.1)
 
 Tuesday, May 26, 2020
 
@@ -164,11 +164,11 @@ Tuesday, May 26, 2020
 * When using the `--dry-run` option in `other-transcode`, issue a warning instead of failing if the output or log files already exist.
 * Add a link to another Docker container for Linux in the "README" document. Thanks, @ttyS0!
 
-## [0.3.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.3.0)
+## [0.3.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.3.0)
 
 Thursday, February 27, 2020
 
-* Add a `--scan` option to `other-transcode`. This prints media information and then exits, allowing easy identification of track numbers and formats. Via [ #11](https://github.com/donmelton/other_video_transcoding/issues/11).
+* Add a `--scan` option to `other-transcode`. This prints media information and then exits, allowing easy identification of track numbers and formats. Via [ #11](https://github.com/lisamelton/other_video_transcoding/issues/11).
 * Add a `--mono-bitrate` option to `other-transcode`. This sets the mono audio bitrate, which is otherwise 50% of the stereo bitrate.
 * Raise the maximum bitrates for audio in AAC format to 320 Kbps for stereo and 256 Kbps for mono. The default birates remain the same.
 * Add a `--all-eac3` option to `other-transcode`. This uses the Dolby Digital Plus (Enhanced AC-3) format for all transcoded audio. The behavior of the `--eac3` option, which uses Dolby Digital Plus for surround audio only, remains the same.
@@ -180,18 +180,18 @@ Thursday, February 27, 2020
 * Remove the deprecated `--name` option of `other-transcode`.
 * Add a link to a Docker container for Linux in the "README" document. Thanks, @ttyS0!
 
-## [0.2.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.2.0)
+## [0.2.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.2.0)
 
 Monday, January 13, 2020
 
-* Allow `all` to be used as an argument to the `--add-audio` and `--add-subtitle` options of `other-transcode`, adding all audio tracks or all subtitle tracks. Via [ #3](https://github.com/donmelton/other_video_transcoding/issues/3).
-* Add `original` as a width attribute to the `--main-audio` and `--add-audio` options of `other-transcode`. Unlike `stereo` and `surround`, this disables transcoding and always copies the selected track(s). Via [ #5](https://github.com/donmelton/other_video_transcoding/issues/5).
+* Allow `all` to be used as an argument to the `--add-audio` and `--add-subtitle` options of `other-transcode`, adding all audio tracks or all subtitle tracks. Via [ #3](https://github.com/lisamelton/other_video_transcoding/issues/3).
+* Add `original` as a width attribute to the `--main-audio` and `--add-audio` options of `other-transcode`. Unlike `stereo` and `surround`, this disables transcoding and always copies the selected track(s). Via [ #5](https://github.com/lisamelton/other_video_transcoding/issues/5).
 * Add a `--copy-video` option to `other-transcode`. This disables transcoding and copies the original video track to the output.
 * No longer ignore any image-based subtitles added to MP4 output. Instead, let `ffmpeg` foolishly add DVD-style subtitles and (currently) fail when adding Blu-ray Disc-style subtitles.
 * Deprecate the `--name` option of `other-transcode` because it doesn't make sense to name only the first output file from a tool which can take multiple inputs. The option still works for now, but using it issues a warning message. It will be removed in a future release.
 * Remove warnings when other options disable the Nvidia video decoder, which could only happen if the `--burn-subtitle` or `--detelecine` options were used with the `--cuvid` option.
 
-## [0.1.1](https://github.com/donmelton/other_video_transcoding/releases/tag/0.1.1)
+## [0.1.1](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.1.1)
 
 Friday, January 3, 2020
 
@@ -203,7 +203,7 @@ Friday, January 3, 2020
     * Also explain how to install those same programs on macOS using Homebrew.
 * Update all copyright notices to the year 2020.
 
-## [0.1.0](https://github.com/donmelton/other_video_transcoding/releases/tag/0.1.0)
+## [0.1.0](https://github.com/lisamelton/other_video_transcoding/releases/tag/0.1.0)
 
 Thursday, December 26, 2019
 

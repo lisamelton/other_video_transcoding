@@ -4,9 +4,9 @@ Other tools to transcode videos.
 
 ## About
 
-Hi, I'm [Don Melton](http://donmelton.com/). I created these tools to transcode my collection of Blu-ray Discs and DVDs into a smaller, more portable format while remaining high enough quality to be mistaken for the originals.
+Hi, I'm [Lisa Melton](http://lisamelton.net/). I created these tools to transcode my collection of Blu-ray Discs and DVDs into a smaller, more portable format while remaining high enough quality to be mistaken for the originals.
 
-Unlike my older [Video Transcoding](https://github.com/donmelton/video_transcoding) project, the `other-transcode` tool in this package automatically selects a platform-specific hardware video encoder rather than relying on a slower software encoder.
+Unlike my older [Video Transcoding](https://github.com/lisamelton/video_transcoding) project, the `other-transcode` tool in this package automatically selects a platform-specific hardware video encoder rather than relying on a slower software encoder.
 
 Using an encoder built into a CPU or video card means that even Blu-ray Disc-sized media can be transcoded 5 to 10 times faster than its original playback speed, depending on which hardware is available.
 
@@ -32,7 +32,7 @@ And many features are supported including:
 
 Also included in this package is `ask-ffmpeg-log` which reports temporal information from FFmpeg-generated `.log` files containing encoding statistics.
 
-Additional documentation for this project is available in the [wiki](https://github.com/donmelton/other_video_transcoding/wiki).
+Additional documentation for this project is available in the [wiki](https://github.com/lisamelton/other_video_transcoding/wiki).
 
 ## Installation
 
@@ -60,7 +60,7 @@ Optional crop previewing also requires the `mpv` command line program.
 
 See "[Download FFmpeg](https://ffmpeg.org/download.html)," "[MKVToolNix Downloads](https://mkvtoolnix.download/downloads.html)" and "[mpv Installation](https://mpv.io/installation/)" to find versions for your platform.
 
-Additional documentation for installing these programs on Windows is available in the [wiki](https://github.com/donmelton/other_video_transcoding/wiki/Windows).
+Additional documentation for installing these programs on Windows is available in the [wiki](https://github.com/lisamelton/other_video_transcoding/wiki/Windows).
 
 [Docker](https://en.wikipedia.org/wiki/Docker_(software)) containers for Linux, including installation instructions, are available here:
 
@@ -115,7 +115,7 @@ Use the `--eac3` option to create Dolby Digital Plus audio:
 
 ## Feedback
 
-Please report bugs or ask questions by [creating a new issue](https://github.com/donmelton/other_video_transcoding/issues) on GitHub. I always try to respond quickly but sometimes it may take as long as 24 hours.
+Please report bugs or ask questions by [creating a new issue](https://github.com/lisamelton/other_video_transcoding/issues) on GitHub. I always try to respond quickly but sometimes it may take as long as 24 hours.
 
 ## Acknowledgements
 
@@ -123,4 +123,4 @@ This project would not be possible without my collaborators on the [Video Transc
 
 ## License
 
-Other Video Transcoding is copyright [Don Melton](http://donmelton.com/) and available under a [MIT license](https://github.com/donmelton/other_video_transcoding/blob/master/LICENSE).
+Other Video Transcoding is copyright [Lisa Melton](http://lisamelton.net/) and available under a [MIT license](https://github.com/lisamelton/other_video_transcoding/blob/master/LICENSE).
