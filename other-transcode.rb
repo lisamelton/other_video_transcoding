@@ -1167,12 +1167,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       unless @scan or @detect
         output_path = File.basename(path, '.*') + '.' + @format.to_s
         fail_or_warn "output file already exists: #{output_path}" if File.exist? output_path
-
-        log_path = output_path + '.log'
-        fail_or_warn "log file already exists: #{log_path}" if File.exist? log_path
-
-        tmp_log_path = "_ffmpeg_#{rand(10000..99999)}_#{$PROCESS_ID}.#{@format.to_s}.log"
-        fail_or_warn "log file already exists: #{tmp_log_path}" if File.exist? tmp_log_path
       end
 
       media_info = scan_media(path)
@@ -1248,9 +1242,11 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       output = ''
 
       begin
-        IO.popen({
-          'FFREPORT' => "file=#{tmp_log_path}:level=40"
-        }, ffmpeg_command, 'rb', :err=>[:child, :out]) do |io|
+        IO.popen(
+            @debug ? {'FFREPORT' => "level=40"} : {},
+            ffmpeg_command,
+            'rb',
+            :err=>[:child, :out]) do |io|
           Signal.trap 'INT' do
             Process.kill 'INT', io.pid
           end
@@ -1265,18 +1261,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       end
 
       fail "transcoding failed: #{output_path}" unless $CHILD_STATUS.exitstatus == 0
-
-      if File.exist? log_path
-        Kernel.warn '**********'
-        Kernel.warn "log file already exists: #{log_path}"
-        Kernel.warn "using temporary filename for assembled log: #{tmp_log_path}"
-        Kernel.warn '**********'
-        log_path = tmp_log_path
-      else
-        FileUtils.mv tmp_log_path, log_path
-      end
-
-      assemble_log log_path, output
 
       if @format == :mp4
         Kernel.warn 'Done.'
@@ -2282,29 +2266,6 @@ Requires `ffprobe`, `ffmpeg` and `mkvpropedit`.
       return ['-sn'] if options.empty?
 
       options
-    end
-
-    def assemble_log(log_path, output)
-      Kernel.warn 'Assembling `.log` file...'
-      content = ''
-
-      begin
-        content = File.read(log_path)
-      rescue SystemCallError => e
-        raise "reading `.log` file failed: #{e}"
-      end
-
-      begin
-        log_file = File.new(log_path, 'wb')
-        log_file.print content
-          .gsub(/^.*Warning during encoding.*\R/, '')
-          .gsub(/^.*dropping frame [0-9]+ from stream.*\R/, '')
-        log_file.puts 'Stats:'
-        log_file.print output.gsub(/^.*\r(.)/, '\1')
-        log_file.close
-      rescue SystemCallError => e
-        raise "writing `.log` file failed: #{e}"
-      end
     end
 
     def add_track_statistics_tags(output_path)
