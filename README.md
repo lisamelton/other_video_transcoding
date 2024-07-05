@@ -70,7 +70,7 @@ Additional documentation for installing these programs on Windows is available i
 
 [Docker](https://en.wikipedia.org/wiki/Docker_(software)) containers for Linux, including installation instructions, are available here:
 
-https://github.com/ttyS0/docker-other-transcode.rb
+https://git.skj.dev/sean/container-other-transcode
 
 On macOS, all of these programs can be easily installed via [Homebrew](http://brew.sh/), an optional package manager:
 
