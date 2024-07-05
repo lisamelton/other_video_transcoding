@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# other-transcode
+# other-transcode.rb
 #
 # Copyright (c) 2019-2024 Lisa Melton
 #
@@ -18,7 +18,7 @@ module Transcoding
   class Command
     def about
       <<-HERE
-other-transcode 0.12.0
+other-transcode.rb 0.0.02024070501
 Copyright (c) 2019-2024 Lisa Melton
       HERE
     end
