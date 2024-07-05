@@ -4,15 +4,15 @@ Other tools to transcode videos.
 
 ## About
 
-Hi, I'm [Lisa Melton](http://lisamelton.net/). I created these tools to transcode my collection of Blu-ray Discs and DVDs into a smaller, more portable format while remaining high enough quality to be mistaken for the originals.
+Hi, I'm [Lisa Melton](http://lisamelton.net/). I created this project to transcode my collection of Blu-ray Discs and DVDs into a smaller, more portable format while remaining high enough quality to be mistaken for the originals.
 
-Unlike my older [Video Transcoding](https://github.com/lisamelton/video_transcoding) project, the `other-transcode` tool in this package automatically selects a platform-specific hardware video encoder rather than relying on a slower software encoder.
+Unlike my older [Video Transcoding](https://github.com/lisamelton/video_transcoding) project, the `other-transcode.rb` tool in this package automatically selects a platform-specific hardware video encoder rather than relying on a slower software encoder.
 
 Using an encoder built into a CPU or video card means that even Blu-ray Disc-sized media can be transcoded 5 to 10 times faster than its original playback speed, depending on which hardware is available.
 
-But even at those speeds, quality is never compromised because the `other-transcode` tool also selects the best ratecontrol system available within those encoders and properly configures that system. This is what sets it apart from other tools using hardware encoders.
+But even at those speeds, quality is never compromised because the `other-transcode.rb` tool also selects the best ratecontrol system available within those encoders and properly configures that system. This is what sets it apart from other tools using hardware encoders.
 
-Because the `other-transcode` tool leverages [FFmpeg](http://ffmpeg.org/), many hardware platforms are supported including:
+Because `other-transcode.rb` leverages [FFmpeg](http://ffmpeg.org/), many hardware platforms are supported including:
 
 * [Nvidia NVENC](https://en.wikipedia.org/wiki/Nvidia_NVENC)
 * [Intel Quick Sync Video](https://en.wikipedia.org/wiki/Intel_Quick_Sync_Video)
@@ -30,27 +30,33 @@ And many features are supported including:
 * [Dolby Digital Plus](https://en.wikipedia.org/wiki/Dolby_Digital_Plus) (Enhanced AC-3) audio encoding
 * Burning image-based subtitles into video output to ease player compatibility
 
-Also included in this package is `ask-ffmpeg-log` which reports temporal information from FFmpeg-generated `.log` files containing encoding statistics.
-
 Additional documentation for this project is available in the [wiki](https://github.com/lisamelton/other_video_transcoding/wiki).
 
 ## Installation
 
-_Avoid installing within [virtual machines](https://en.wikipedia.org/wiki/Virtual_machine) such as the [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) since access to hardware video encoders may not be allowed, severely impacting performance._
+> [!WARNING]
+> *Older versions of this project were packaged via [RubyGems](https://en.wikipedia.org/wiki/RubyGems) and installed via the `gem` command. If you had it installed that way, it's a good idea to uninstall that version via this command: `gem uninstall other_video_transcoding`*
 
-These tools work on Windows, Linux and macOS. They're packaged as a Gem and require Ruby. See "[Installing Ruby](https://www.ruby-lang.org/en/documentation/installation/)" if you don't have it on your platform.
+> [!WARNING]
+> _Avoid installing within [virtual machines](https://en.wikipedia.org/wiki/Virtual_machine) such as the [Windows Subsystem for Linux](https://en.wikipedia.org/wiki/Windows_Subsystem_for_Linux) since access to hardware video encoders may not be allowed, severely impacting performance._
 
-Use this command to install the package: 
+The `other-transcode.rb` tool works on Windows, Linux and macOS. It's a standalone Ruby script which must be installed and updated manually. You can retrieve it via the command line by cloning the entire repository like this:
 
-    gem install other_video_transcoding
+    git clone https://github.com/lisamelton/other_video_transcoding.git
 
-And this command to update it:
+Or download it directly from the GitHub website here:
 
-    gem update other_video_transcoding
+https://github.com/lisamelton/other_video_transcoding
 
-_The commands to install and update may need prefixing with_ `sudo` _on some platforms._
+On Linux and macOS, make sure `other-transcode.rb` is executable by setting its permissions like this:
 
-The `other-transcode` tool in this package requires other software to function properly, specifically these command line programs:
+    chmod +x other-transcode.rb
+
+And then move or copy `other-transcode.rb` to a directory listed in your `$env:PATH` environment variable on Windows or `$PATH` environment variable on Linux and macOS.
+
+Because it's written in Ruby, `other-transcode.rb` requires that language's runtime and interpreter. See "[Installing Ruby](https://www.ruby-lang.org/en/documentation/installation/)" if you don't have it on your platform.
+
+Additional software is required for `other-transcode.rb` to function properly, specifically these command line programs:
 
 * `ffprobe`
 * `ffmpeg`
@@ -64,7 +70,7 @@ Additional documentation for installing these programs on Windows is available i
 
 [Docker](https://en.wikipedia.org/wiki/Docker_(software)) containers for Linux, including installation instructions, are available here:
 
-https://github.com/ttyS0/docker-other-transcode
+https://github.com/ttyS0/docker-other-transcode.rb
 
 On macOS, all of these programs can be easily installed via [Homebrew](http://brew.sh/), an optional package manager:
 
@@ -76,42 +82,39 @@ The `ffprobe` program is included within the `ffmpeg` package and the `mkvproped
 
 ## Usage
 
-Each tool in this package has several command line options. The `other-transcode` tool is the most complex with over 50 of its own. Use `--help` to list the options available for a specific tool, along with brief instructions on their usage:
+The `other-transcode.rb` tool has over 50 command line options. Use `--help` to list the options available along with brief instructions on their usage:
 
-    other-transcode --help
+    other-transcode.rb --help
 
-More options for the `other-transcode` tool are available with:
+More options are available with:
 
-    other-transcode --help more
+    other-transcode.rb --help more
 
 And the full set of options is available with:
 
-    other-transcode --help full
+    other-transcode.rb --help full
 
-The `other-transcode` tool automatically determines target video bitrate, main audio track configuration, etc. without any command line options, so using it can be as simple as this on Windows:
+The `other-transcode.rb` tool automatically determines target video bitrate, main audio track configuration, etc. without any command line options, so using it can be as simple as this on Windows:
 
-    other-transcode C:\Rips\Movie.mkv
+    other-transcode.rb C:\Rips\Movie.mkv
 
 Or this on Linux and macOS:
 
-    other-transcode /Rips/Movie.mkv
+    other-transcode.rb /Rips/Movie.mkv
 
-On completion that command creates two files in the current working directory:
+On completion that command creates its output in the current working directory:
 
     Movie.mkv
-    Movie.mkv.log
-
-The `.log` file can be used as input to the `ask-ffmpeg-log` tool.
 
 Use the `--hevc` option to create HEVC video:
 
-    other-transcode --hevc C:\Rips\Movie.mkv
+    other-transcode.rb --hevc C:\Rips\Movie.mkv
 
 High quality 10-bit HEVC is automatically selected when using the Nvidia and Intel encoders.
 
 Use the `--eac3` option to create Dolby Digital Plus audio:
 
-    other-transcode --eac3 C:\Rips\Movie.mkv
+    other-transcode.rb --eac3 C:\Rips\Movie.mkv
 
 ## Feedback
 
