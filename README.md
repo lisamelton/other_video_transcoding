@@ -82,6 +82,9 @@ The `ffprobe` program is included within the `ffmpeg` package and the `mkvproped
 
 ## Usage
 
+> [!WARNING]
+> Recent changes to Nvidia drivers, versions 555.85 and later, have a bug (or feature?) which ignores target bitrates for HEVC output so that only constant quality values are honored. H.264 output is not affected. Until this is fixed, always add the `--nvenc-cq` option to your command line when using the Nvidia HEVC encoder. Otherwise the encoder will ignore the default bitrate and do something undefined.
+
 The `other-transcode.rb` tool has over 50 command line options. Use `--help` to list the options available along with brief instructions on their usage:
 
     other-transcode.rb --help
