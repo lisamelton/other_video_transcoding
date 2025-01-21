@@ -6,11 +6,9 @@ Other tools to transcode videos.
 
 Hi, I'm [Lisa Melton](http://lisamelton.net/). I created this project to transcode my collection of Blu-ray Discs and DVDs into a smaller, more portable format while remaining high enough quality to be mistaken for the originals.
 
-Unlike my older [Video Transcoding](https://github.com/lisamelton/video_transcoding) project, the `other-transcode.rb` tool in this package automatically selects a platform-specific hardware video encoder rather than relying on a slower software encoder.
+The `other-transcode.rb` tool in this project automatically selects a platform-specific hardware-based video encoder rather than relying on a slower software-based encoder.
 
 Using an encoder built into a CPU or video card means that even Blu-ray Disc-sized media can be transcoded 5 to 10 times faster than its original playback speed, depending on which hardware is available.
-
-But even at those speeds, quality is never compromised because the `other-transcode.rb` tool also selects the best ratecontrol system available within those encoders and properly configures that system. This is what sets it apart from other tools using hardware encoders.
 
 Because `other-transcode.rb` leverages [FFmpeg](http://ffmpeg.org/), many hardware platforms are supported including:
 
