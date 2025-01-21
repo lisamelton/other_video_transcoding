@@ -129,4 +129,4 @@ This project would not be possible without my collaborators on the [Video Transc
 
 ## License
 
-Other Video Transcoding is copyright [Lisa Melton](http://lisamelton.net/) and available under a [MIT license](https://github.com/lisamelton/other_video_transcoding/blob/master/LICENSE).
+Other Video Transcoding is copyright [Lisa Melton](http://lisamelton.net/) and available under an [MIT license](https://github.com/lisamelton/other_video_transcoding/blob/master/LICENSE).
