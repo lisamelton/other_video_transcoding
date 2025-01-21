@@ -2,7 +2,7 @@
 #
 # other-transcode.rb
 #
-# Copyright (c) 2019-2024 Lisa Melton
+# Copyright (c) 2025 Lisa Melton
 #
 
 require 'English'
@@ -19,7 +19,7 @@ module Transcoding
     def about
       <<-HERE
 other-transcode.rb 0.0.02024070501
-Copyright (c) 2019-2024 Lisa Melton
+Copyright (c) 2025 Lisa Melton
       HERE
     end
 
