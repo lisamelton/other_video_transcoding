@@ -1,5 +1,14 @@
 # Changes to the "[Other Video Transcoding](https://github.com/lisamelton/other_video_transcoding)" project
 
+### [2025.01.21](https://github.com/lisamelton/other_video_transcoding/releases/tag/2025.01.21)
+
+Tuesday, January 21, 2025
+
+* Update all copyright notices to the year 2025.
+* Simplify the description of the `other-transcode.rb` tool.
+* Add a note to the "README" document regarding the project's current status.
+* Begin using an updated date-based version numbering scheme.
+
 Friday, July 5, 2024
 
 * Deprecate and replace the [RubyGems](https://en.wikipedia.org/wiki/RubyGems)-based `other-transcode` tool with a new standalone `other-transcode.rb` script.
